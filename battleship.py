@@ -1,6 +1,27 @@
 import random
 
 
+#TO DO LIST
+#
+# Game loop that takes in and saves user input or allows them to exit main loop
+#
+# function to convert user input for ship placement and call place_ship
+#
+# create second gameboard now that grid concept is fleshed out
+# refactor relevant methods to take in a gameboard as an argument so all methods can be invoked on either players board
+#
+# player/profile framework of some sort 
+#
+# interface for choosing ship placements
+#
+# an initial game loop wherein players take turns
+#
+# logic for registering hits and sinkings, ending game
+#
+# initial AI, which will be blindly/randomly guessing shots
+#
+# develop further AI models as outlined in notes
+
 
 # consider refactoring hardcoded 10x10 grid and corresponding logic (eg, checking if, for grid coordinate x, 0 >= x <= 9) into a grid size variable
 # this will allow for arbitrarily scaling the battleship board if a future feature offering different grid sizes (5x5, 20x20, etc) is implemented
@@ -48,8 +69,7 @@ def valid_col_bounds(beg,end):
 
 
 
-# take in two tuples, begin and end, and return all of the coordinates contained between those two points
-# eg, beg = (0,0) and end = (0,9) would return all of the coordinates in row 0
+# take in two tuples, begin and end, and return all of the coordinates contained between those two points along x or y axis
 def generate_full_coords(beg, end):
     full_coords = []
     if get_col_diff(beg,end) == 0:
@@ -100,12 +120,25 @@ def place_ship(shipName, beg, end):
 
 
 
-place_ship('Carrier', (0,0), (4,0))
-place_ship('Submarine', (5,7), (5,9))
-place_ship('Destroyer', (4,8), (5,8))
 
-for i in range(10):
-    print(gameBoard[i])
+# place_ship('Carrier', (0,0), (4,0))
+# place_ship('Submarine', (5,7), (5,9))
+# place_ship('Destroyer', (4,8), (5,8))
 
+# for i in range(10):
+#     print(gameBoard[i])
+
+
+
+gameOn = True
+
+while gameOn:
+    print("Welcome to Battleship")
+    print("This is the gameboard")
+    for i in range(10):
+        print(gameBoard[i])
+    userInput = input("Choose your placements for ships or type exit to quit: ")
+    if userInput == "exit":
+        gameOn = False
 
 
