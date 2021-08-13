@@ -34,6 +34,14 @@ for x in range(10):
     gameBoard.append(['O']*10)
 
 
+def printGameBoard():
+    for i in range(10):
+        if i == 0:
+            print("  '1', '2', '3', '4', '5', '6', '7', '8', '9', '1O'")
+        curLetter = chr(i+65)
+        print(curLetter + " " + str(gameBoard[i]))
+
+
 # hash map for retrieving size of ships with their name as a key
 shipsHashMap = {}
 shipsHashMap['Carrier'] = 5
@@ -135,8 +143,7 @@ gameOn = True
 while gameOn:
     print("Welcome to Battleship")
     print("This is the gameboard")
-    for i in range(10):
-        print(gameBoard[i])
+    printGameBoard()
     userInput = input("Choose your placements for ships or type exit to quit: ")
     if userInput == "exit":
         gameOn = False
