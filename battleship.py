@@ -1,6 +1,7 @@
 import random
 
 
+
 #TO DO LIST
 #
 # Game loop that takes in and saves user input or allows them to exit main loop
@@ -21,6 +22,17 @@ import random
 # initial AI, which will be blindly/randomly guessing shots
 #
 # develop further AI models as outlined in notes
+#
+# AI levels: Hapless Seaman, Admiral Nelson, Fleet Admiral Nimitz
+#
+# # Hapless Seaman: This man would be out of his depth commanding a tugboat. 
+# # Happy will give random fire orders while cowering beneath deck.
+# #
+# # Admiral Nelson: Hero of Trafalgar; Nelson's victory over the French was legendary, but he commanded vessels far less advanced than those present today. 
+# # Nelson will intelligently consider firing solutions based on previous hits and misses.
+# #
+# # Fleet Admiral Nimitz: The greatest admiral of WW2, and the last to hold the title of Fleet Admiral. 
+# # Nimitz will offer you the toughest challenge of all.
 
 
 # consider refactoring hardcoded 10x10 grid and corresponding logic (eg, checking if, for grid coordinate x, 0 >= x <= 9) into a grid size variable
@@ -29,15 +41,24 @@ import random
 # ROWS, then COLS. So Row 4, Col 5 is gameBoard[4][5]. 
 # 0,0 top left and 9,9 bottom right
 
+
+
+
+
+
+#
+#
+# GRID CREATION AND PRINTING, HASHMAP FOR SHIP LENGTHS
+#
+#
 gameBoard = []
 for x in range(10):
     gameBoard.append(['O']*10)
 
-
 def printGameBoard():
     for i in range(10):
         if i == 0:
-            print("  '1', '2', '3', '4', '5', '6', '7', '8', '9', '1O'")
+            print("    1    2    3    4    5    6    7    8    9    1O ")
         curLetter = chr(i+65)
         print(curLetter + " " + str(gameBoard[i]))
 
@@ -52,7 +73,11 @@ shipsHashMap['Destroyer'] = 2
 
 
 
-
+#
+#
+# GRID RELATED HELPER FUNCTIONS
+#
+#
 
 # Returns True if two x,y tuples are in the same row
 def in_same_row(beg, end):
@@ -75,8 +100,6 @@ def valid_row_bounds(beg,end):
 def valid_col_bounds(beg,end):
     return beg[1] >= 0 and end[1] <= 9
 
-
-
 # take in two tuples, begin and end, and return all of the coordinates contained between those two points along x or y axis
 def generate_full_coords(beg, end):
     full_coords = []
@@ -87,7 +110,6 @@ def generate_full_coords(beg, end):
         for i in range(beg[1], end[1]+1):
             full_coords.append((beg[0],i))
     return full_coords
-    
 
 #returns True if the coordinate sent as an argument already has a ship occupying it on the board
 def square_occupied(grid_tuple):
@@ -127,25 +149,201 @@ def place_ship(shipName, beg, end):
 
 
 
+#
+#
+# USER INPUT AND AXIS CONVERSION HELPER FUNCTIONS
+#
+#
+
+def letter_to_ord(ltr):
+    if len(ltr) != 1:
+        raise Exception("Letter string larger than 1")
+    elif ord(ltr) >= 65 and ord(ltr) <= 75:
+        return ord(ltr)
+    else:
+        raise Exception("Letter outside acceptable ord range")
+
+def ord_to_letter(num):
+    if num >= 65 and num <= 75:
+        return chr(num)
+    else:
+        raise Exception("Letter outside acceptable ord range")
+
+def ord_to_grid_num(ordnum):
+    return ordnum-65
+
+def validate_user_coord(user_coord):
+    row = user_coord[0]
+    if len(user_coord) == 2:
+        col = int(user_coord[1])
+    elif len(user_coord) == 3:
+        col = int(user_coord[1] + user_coord[2])
+    print(row,col)
+
+    if len(user_coord) not in range(2,4):
+        raise Exception("User coordinate improper length")
+    
+    elif letter_to_ord(row) != 0 and col in range(1,11):
+        row = letter_to_ord(row)
+        row = ord_to_grid_num(row)
+        col = col -1
+        return (row, col)
+    else:
+        raise Exception("Either row or column input not acceptable")
 
 
-# place_ship('Carrier', (0,0), (4,0))
-# place_ship('Submarine', (5,7), (5,9))
-# place_ship('Destroyer', (4,8), (5,8))
-
-# for i in range(10):
-#     print(gameBoard[i])
 
 
+#
+#
+# GAME LOOP HELPER FUNCTIONS
+#
+#
+
+def print_board_input_spacer():
+    print("")
+    print("")
+    printGameBoard()
+    print("")
+    print("")
+
+
+#
+#
+#   GAME LOOP BEGINS HERE   
+#
+#
 
 gameOn = True
 
+print("")
+print("Welcome to Battleship!")
+print_board_input_spacer()
 while gameOn:
-    print("Welcome to Battleship")
-    print("This is the gameboard")
-    printGameBoard()
-    userInput = input("Choose your placements for ships or type exit to quit: ")
-    if userInput == "exit":
-        gameOn = False
+    userInput = input("Type yes to begin placing ships or exit to quit: ")
+    inputLoop = True
+    while inputLoop:
+        if userInput == "exit":
+            gameOn = False
+            inputLoop = False
+        elif userInput == "yes":
+            print("")
+            print("Your first ship is an Aircraft Carrier, 5 squares long.")
+            print("Ships can only be placed vertically or horizontally.")
+            print("You will be asked for a pair of coordinates, beginning and end.")
+            print("For horizontal placement, beginning should be the left of the two. For vertical, the upper of the two.")
+            print("Example valid input for the Aircraft Carrier:")
+            print("-Beginning: A1, End: A5")
+            carrierLoop = True
+            while carrierLoop:
+                inputBeg = input("Type the beginning coordinate: ")
+                inputEnd = input("Type the ending coordinate: ")
+                print("Are your sure you want to start from " + inputBeg + " and end at " + inputEnd +  "?")
+                confirmCoords = input("Type yes to continue or no to enter new coordinates: ")
+                if confirmCoords == "yes":
+                    battleshipBeg = validate_user_coord(inputBeg)
+                    battleshipEnd = validate_user_coord(inputEnd)
+                    print(battleshipBeg)
+                    print(battleshipEnd)
+                    place_ship("Carrier", battleshipBeg, battleshipEnd)
+                    carrierLoop = False
+                elif confirmCoords == "no":
+                    pass
+                else:
+                    print("You must enter 'yes' or 'no'!")
 
+
+            print_board_input_spacer()
+            print("Your next ship is a Battleship, 4 squares long.")
+            battleshipLoop = True
+            while battleshipLoop:
+                inputBeg = input("Type the beginning coordinate: ")
+                inputEnd = input("Type the ending coordinate: ")
+                print("Are your sure you want to start from " + inputBeg + " and end at " + inputEnd +  "?")
+                confirmCoords = input("Type yes to continue or no to enter new coordinates: ")
+                if confirmCoords == "yes":
+                    battleshipBeg = validate_user_coord(inputBeg)
+                    battleshipEnd = validate_user_coord(inputEnd)
+                    print(battleshipBeg)
+                    print(battleshipEnd)
+                    place_ship("Battleship", battleshipBeg, battleshipEnd)
+                    battleshipLoop = False
+                elif confirmCoords == "no":
+                    pass
+                else:
+                    print("You must enter 'yes' or 'no'!")
+
+
+            print_board_input_spacer()
+            print("Your next ship is a Cruiser, 3 squares long.")
+            cruiserLoop = True
+            while cruiserLoop:
+                inputBeg = input("Type the beginning coordinate: ")
+                inputEnd = input("Type the ending coordinate: ")
+                print("Are your sure you want to start from " + inputBeg + " and end at " + inputEnd +  "?")
+                confirmCoords = input("Type yes to continue or no to enter new coordinates: ")
+                if confirmCoords == "yes":
+                    cruiserBeg = validate_user_coord(inputBeg)
+                    cruiserEnd = validate_user_coord(inputEnd)
+                    print(cruiserBeg)
+                    print(cruiserEnd)
+                    place_ship("Cruiser", cruiserBeg, cruiserEnd)
+                    cruiserLoop = False
+                elif confirmCoords == "no":
+                    pass
+                else:
+                    print("You must enter 'yes' or 'no'!")
+
+
+            print_board_input_spacer()
+            print("Your next ship is a Submarine, 3 squares long.")
+            submarineLoop = True
+            while submarineLoop:
+                inputBeg = input("Type the beginning coordinate: ")
+                inputEnd = input("Type the ending coordinate: ")
+                print("Are your sure you want to start from " + inputBeg + " and end at " + inputEnd +  "?")
+                confirmCoords = input("Type yes to continue or no to enter new coordinates: ")
+                if confirmCoords == "yes":
+                    submarineBeg = validate_user_coord(inputBeg)
+                    submarineEnd = validate_user_coord(inputEnd)
+                    print(submarineBeg)
+                    print(submarineEnd)
+                    place_ship("Submarine", submarineBeg, submarineEnd)
+                    submarineLoop = False
+                elif confirmCoords == "no":
+                    pass
+                else:
+                    print("You must enter 'yes' or 'no'!")
+
+
+            print_board_input_spacer()
+            print("Your next ship is a Destroyer, 2 squares long.")
+            destroyerLoop = True
+            while destroyerLoop:
+                inputBeg = input("Type the beginning coordinate: ")
+                inputEnd = input("Type the ending coordinate: ")
+                print("Are your sure you want to start from " + inputBeg + " and end at " + inputEnd +  "?")
+                confirmCoords = input("Type yes to continue or no to enter new coordinates: ")
+                if confirmCoords == "yes":
+                    destroyerBeg = validate_user_coord(inputBeg)
+                    destroyerEnd = validate_user_coord(inputEnd)
+                    print(destroyerBeg)
+                    print(destroyerEnd)
+                    place_ship("Destroyer", destroyerBeg, destroyerEnd)
+                    destroyerLoop = False
+                elif confirmCoords == "no":
+                    pass
+                else:
+                    print("You must enter 'yes' or 'no'!")
+
+            
+            print_board_input_spacer()
+            print("All ships successfully placed!")
+            inputLoop = False
+            
+
+
+        else:
+            print("You must enter 'yes' or 'exit'!")
+            break
 
