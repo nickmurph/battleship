@@ -1,21 +1,20 @@
 import random
+import os
 
 
-
-#TO DO LIST
+# TO DO LIST
 #
-# Game loop that takes in and saves user input or allows them to exit main loop
+# Adopt more visually appealing grid print method from testhelpers.py
+## - settle on symbols for hits, misses, ocean, etc
+## - implement colored symbols with colorama?
 #
-# function to convert user input for ship placement and call place_ship
+# Also adopt the three tiered approach to the gameboards from testhelpers.py
 #
-# create second gameboard now that grid concept is fleshed out
 # refactor relevant methods to take in a gameboard as an argument so all methods can be invoked on either players board
 #
-# player/profile framework of some sort 
+# next step in game loop will be player/AI taking turns (further details on this and next 3 points at bottom of game loop)
 #
-# interface for choosing ship placements
-#
-# an initial game loop wherein players take turns
+# which necessitates an interface for the player choosing their next shot
 #
 # logic for registering hits and sinkings, ending game
 #
@@ -24,22 +23,24 @@ import random
 # develop further AI models as outlined in notes
 #
 # AI levels: Hapless Seaman, Admiral Nelson, Fleet Admiral Nimitz
-#
 # # Hapless Seaman: This man would be out of his depth commanding a tugboat. 
 # # Happy will give random fire orders while cowering beneath deck.
 # #
-# # Admiral Nelson: Hero of Trafalgar; Nelson's victory over the French was legendary, but he commanded vessels far less advanced than those present today. 
+# # Admiral Nelson: Nelson's victory over the French was legendary, but he commanded vessels far less advanced than those present today. 
 # # Nelson will intelligently consider firing solutions based on previous hits and misses.
 # #
 # # Fleet Admiral Nimitz: The greatest admiral of WW2, and the last to hold the title of Fleet Admiral. 
-# # Nimitz will offer you the toughest challenge of all.
-
-
-# consider refactoring hardcoded 10x10 grid and corresponding logic (eg, checking if, for grid coordinate x, 0 >= x <= 9) into a grid size variable
-# this will allow for arbitrarily scaling the battleship board if a future feature offering different grid sizes (5x5, 20x20, etc) is implemented
-
-# ROWS, then COLS. So Row 4, Col 5 is gameBoard[4][5]. 
-# 0,0 top left and 9,9 bottom right
+# # Nimitz will offer you the toughest challenge of all (more advanced logic re: traversing the grid, future implementation of remembering player tendencies?)
+#
+#
+# consider refactoring hardcoded 10x10 grid and corresponding logic (eg, checking if, for grid coordinate x, 0 >= x <= 9) into a gridSize variable
+# this will allow for arbitrarily scaling the battleship board if a future feature with different grid sizes is implemented
+#
+#
+# player/profile framework of some sort
+## - username/password good excuse to demonstrate proper implementation of password hashing/data storage, lays foundation for eventual GUI version
+## - having player profiles would also allow for the tracking of tendencies -> future implementation of learning (or at least remembering) AI
+#
 
 
 
@@ -52,8 +53,14 @@ import random
 #
 #
 gameBoard = []
+enemyBoard = []
+openSea = 'O'
+shipBody = 'X'
+shipStruck = '%'
+
 for x in range(10):
-    gameBoard.append(['O']*10)
+    gameBoard.append([openSea]*10)
+    enemyBoard.append([openSea]*10)
 
 def printGameBoard():
     for i in range(10):
@@ -113,21 +120,22 @@ def generate_full_coords(beg, end):
 
 #returns True if the coordinate sent as an argument already has a ship occupying it on the board
 def square_occupied(grid_tuple):
-    return gameBoard[grid_tuple[0]][grid_tuple[1]] == 'X'
+    return gameBoard[grid_tuple[0]][grid_tuple[1]] == shipBody
 
 def coords_occupied(full_coords):
     flag = False
     for coord in full_coords:
         if square_occupied(coord):
             flag = True
-            print("This coordinate, " + str(coord) + ", is already occupied!")
+            #print("This coordinate, " + str(coord) + ", is already occupied!")
     return flag
 
 
 
-# This may be over-engineered in comparison to old placing function(s)
-# is abstracting out messy math with helper functions more readable?
-# Or does it result in a pause to understand what each function might be doing, whereas the bare math was more obvious despite the mess?
+# 
+# Places a ship on the grid in the squares between beg and end
+# ARGS: string, tuple, tuple
+# 
 def place_ship(shipName, beg, end):
     shipLength = shipsHashMap[shipName]
 
@@ -136,14 +144,14 @@ def place_ship(shipName, beg, end):
         potential_coords = generate_full_coords(beg,end)
         if coords_occupied(potential_coords) != True:
             for i in range(shipLength):
-                gameBoard[beg[0]][beg[1]+i] = 'X'
+                gameBoard[beg[0]][beg[1]+i] = shipBody
 
     #this is a placement from top to bottom along a column, with beg as the top coordinates
     elif in_same_column(beg,end) and get_row_diff(beg,end) == shipLength-1 and valid_row_bounds(beg,end):
         potential_coords = generate_full_coords(beg,end)
         if coords_occupied(potential_coords) != True:
             for i in range(shipLength):
-                gameBoard[beg[0]+i][beg[1]] = 'X'
+                gameBoard[beg[0]+i][beg[1]] = shipBody
     else:
         raise Exception("These coordinates are invalid!")
 
@@ -178,7 +186,7 @@ def validate_user_coord(user_coord):
         col = int(user_coord[1])
     elif len(user_coord) == 3:
         col = int(user_coord[1] + user_coord[2])
-    print(row,col)
+    #print(row,col)
 
     if len(user_coord) not in range(2,4):
         raise Exception("User coordinate improper length")
@@ -200,12 +208,124 @@ def validate_user_coord(user_coord):
 #
 #
 
-def print_board_input_spacer():
+def input_spacer_with_board():
     print("")
     print("")
     printGameBoard()
     print("")
     print("")
+
+
+def input_spacer_no_board():
+    print("")
+    print("")    
+
+def clear_terminal():
+    os.system('cls||clear')
+
+
+def print_ascii_logo():
+   print( """
+
+                ██████╗  █████╗ ████████╗████████╗██╗     ███████╗███████╗██╗  ██╗██╗██████╗ 
+                ██╔══██╗██╔══██╗╚══██╔══╝╚══██╔══╝██║     ██╔════╝██╔════╝██║  ██║██║██╔══██╗
+                ██████╔╝███████║   ██║      ██║   ██║     █████╗  ███████╗███████║██║██████╔╝
+                ██╔══██╗██╔══██║   ██║      ██║   ██║     ██╔══╝  ╚════██║██╔══██║██║██╔═══╝ 
+                ██████╔╝██║  ██║   ██║      ██║   ███████╗███████╗███████║██║  ██║██║██║     
+                ╚═════╝ ╚═╝  ╚═╝   ╚═╝      ╚═╝   ╚══════╝╚══════╝╚══════╝╚═╝  ╚═╝╚═╝╚═╝     
+                                                                                            
+                """)
+
+def ship_input_loop(shipName):
+    if shipName == "Carrier":
+        print("Your first ship is a " + shipName + ", " + str(shipsHashMap[shipName]) + " squares long.")
+    else:
+        print("Your next ship is a " + shipName + ", " + str(shipsHashMap[shipName]) + " squares long.")
+    
+    shipLoop = True
+    while shipLoop:
+        inputBeg = input("Type the beginning coordinate: ")
+        inputEnd = input("Type the ending coordinate: ")
+        print("Are your sure you want to start from " + inputBeg + " and end at " + inputEnd +  "?")
+        confirmCoords = input("Type yes to continue or no to enter new coordinates: ")
+        if confirmCoords == "yes":
+            shipBeg = validate_user_coord(inputBeg)
+            shipEnd = validate_user_coord(inputEnd)
+            place_ship(shipName, shipBeg, shipEnd)
+            shipLoop = False
+        elif confirmCoords == "no":
+            pass
+        else:
+            print("You must enter 'yes' or 'no'!")
+
+
+
+
+
+#
+#
+#   Automated Ship Placement functions   
+#
+#
+def generate_valid_horizontal_placements(shipSize):
+    shipSizeOffset = shipSize -1
+    validHorzList = []
+    for row in range(10):
+        for col in range(10):
+            if col+shipSizeOffset < 10:
+                begTuple = (row,col)
+                endTuple = (row, col+shipSizeOffset)
+                validHorzList.append((begTuple, endTuple))
+    return validHorzList
+
+def generate_valid_vertical_placements(shipSize):
+    shipSizeOffset = shipSize -1
+    validVertList = []
+    for col in range(10):
+        for row in range(10):
+            if row+shipSizeOffset < 10:
+                begTuple = (row,col)
+                endTuple = (row+shipSizeOffset, col)
+                validVertList.append((begTuple,endTuple))
+    return validVertList
+
+
+def automatic_ship_placement(shipName):
+    shipSize = shipsHashMap[shipName]
+    validHorzPlacements = generate_valid_horizontal_placements(shipSize)
+    validVertPlacements = generate_valid_vertical_placements(shipSize)
+    
+    totalPossibilities = len(validHorzPlacements) + len (validVertPlacements)
+    
+    
+    seekingValidPlacement = True
+    while seekingValidPlacement:
+        randNum = int(random.uniform(0, totalPossibilities-1))
+        randPair = None
+        
+        if randNum < len(validHorzPlacements):
+            randPair = validHorzPlacements[randNum]
+        else:
+            randPair = validVertPlacements[randNum-len(validHorzPlacements)]
+
+        full_coords = generate_full_coords(randPair[0],randPair[1])
+        if coords_occupied(full_coords) != True:
+            place_ship(shipName, randPair[0], randPair[1])
+            #print("Succesfully placed ship on board")
+            seekingValidPlacement = False
+        else:
+            #print("At least one of the coordinates is already occupied")
+            ...
+
+      
+
+def auto_place_all_ships():
+    automatic_ship_placement("Carrier")
+    automatic_ship_placement("Battleship")
+    automatic_ship_placement("Cruiser")
+    automatic_ship_placement("Submarine")
+    automatic_ship_placement("Destroyer")
+
 
 
 #
@@ -216,134 +336,74 @@ def print_board_input_spacer():
 
 gameOn = True
 
-print("")
-print("Welcome to Battleship!")
-print_board_input_spacer()
+input_spacer_no_board()
+# print("Welcome to Battleship!")
+print_ascii_logo()
+input_spacer_with_board()
+
+
+inputLoop = True
+
 while gameOn:
-    userInput = input("Type yes to begin placing ships or exit to quit: ")
-    inputLoop = True
+        
     while inputLoop:
+        userInput = input("Type yes to begin placing ships, auto to have them placed for you, or exit to quit: ")
         if userInput == "exit":
             gameOn = False
             inputLoop = False
+        
         elif userInput == "yes":
-            print("")
-            print("Your first ship is an Aircraft Carrier, 5 squares long.")
+            print ("\033[A                                                              \033[A")
+            input_spacer_no_board()
             print("Ships can only be placed vertically or horizontally.")
             print("You will be asked for a pair of coordinates, beginning and end.")
             print("For horizontal placement, beginning should be the left of the two. For vertical, the upper of the two.")
-            print("Example valid input for the Aircraft Carrier:")
-            print("-Beginning: A1, End: A5")
-            carrierLoop = True
-            while carrierLoop:
-                inputBeg = input("Type the beginning coordinate: ")
-                inputEnd = input("Type the ending coordinate: ")
-                print("Are your sure you want to start from " + inputBeg + " and end at " + inputEnd +  "?")
-                confirmCoords = input("Type yes to continue or no to enter new coordinates: ")
-                if confirmCoords == "yes":
-                    battleshipBeg = validate_user_coord(inputBeg)
-                    battleshipEnd = validate_user_coord(inputEnd)
-                    print(battleshipBeg)
-                    print(battleshipEnd)
-                    place_ship("Carrier", battleshipBeg, battleshipEnd)
-                    carrierLoop = False
-                elif confirmCoords == "no":
-                    pass
-                else:
-                    print("You must enter 'yes' or 'no'!")
+            input_spacer_no_board()
 
+            ship_input_loop("Carrier")
+            input_spacer_with_board()
+            ship_input_loop("Battleship")
+            input_spacer_with_board()
+            ship_input_loop("Cruiser")
+            input_spacer_with_board()
+            ship_input_loop("Submarine")
+            input_spacer_with_board()
+            ship_input_loop("Destroyer")
+            input_spacer_with_board()
 
-            print_board_input_spacer()
-            print("Your next ship is a Battleship, 4 squares long.")
-            battleshipLoop = True
-            while battleshipLoop:
-                inputBeg = input("Type the beginning coordinate: ")
-                inputEnd = input("Type the ending coordinate: ")
-                print("Are your sure you want to start from " + inputBeg + " and end at " + inputEnd +  "?")
-                confirmCoords = input("Type yes to continue or no to enter new coordinates: ")
-                if confirmCoords == "yes":
-                    battleshipBeg = validate_user_coord(inputBeg)
-                    battleshipEnd = validate_user_coord(inputEnd)
-                    print(battleshipBeg)
-                    print(battleshipEnd)
-                    place_ship("Battleship", battleshipBeg, battleshipEnd)
-                    battleshipLoop = False
-                elif confirmCoords == "no":
-                    pass
-                else:
-                    print("You must enter 'yes' or 'no'!")
-
-
-            print_board_input_spacer()
-            print("Your next ship is a Cruiser, 3 squares long.")
-            cruiserLoop = True
-            while cruiserLoop:
-                inputBeg = input("Type the beginning coordinate: ")
-                inputEnd = input("Type the ending coordinate: ")
-                print("Are your sure you want to start from " + inputBeg + " and end at " + inputEnd +  "?")
-                confirmCoords = input("Type yes to continue or no to enter new coordinates: ")
-                if confirmCoords == "yes":
-                    cruiserBeg = validate_user_coord(inputBeg)
-                    cruiserEnd = validate_user_coord(inputEnd)
-                    print(cruiserBeg)
-                    print(cruiserEnd)
-                    place_ship("Cruiser", cruiserBeg, cruiserEnd)
-                    cruiserLoop = False
-                elif confirmCoords == "no":
-                    pass
-                else:
-                    print("You must enter 'yes' or 'no'!")
-
-
-            print_board_input_spacer()
-            print("Your next ship is a Submarine, 3 squares long.")
-            submarineLoop = True
-            while submarineLoop:
-                inputBeg = input("Type the beginning coordinate: ")
-                inputEnd = input("Type the ending coordinate: ")
-                print("Are your sure you want to start from " + inputBeg + " and end at " + inputEnd +  "?")
-                confirmCoords = input("Type yes to continue or no to enter new coordinates: ")
-                if confirmCoords == "yes":
-                    submarineBeg = validate_user_coord(inputBeg)
-                    submarineEnd = validate_user_coord(inputEnd)
-                    print(submarineBeg)
-                    print(submarineEnd)
-                    place_ship("Submarine", submarineBeg, submarineEnd)
-                    submarineLoop = False
-                elif confirmCoords == "no":
-                    pass
-                else:
-                    print("You must enter 'yes' or 'no'!")
-
-
-            print_board_input_spacer()
-            print("Your next ship is a Destroyer, 2 squares long.")
-            destroyerLoop = True
-            while destroyerLoop:
-                inputBeg = input("Type the beginning coordinate: ")
-                inputEnd = input("Type the ending coordinate: ")
-                print("Are your sure you want to start from " + inputBeg + " and end at " + inputEnd +  "?")
-                confirmCoords = input("Type yes to continue or no to enter new coordinates: ")
-                if confirmCoords == "yes":
-                    destroyerBeg = validate_user_coord(inputBeg)
-                    destroyerEnd = validate_user_coord(inputEnd)
-                    print(destroyerBeg)
-                    print(destroyerEnd)
-                    place_ship("Destroyer", destroyerBeg, destroyerEnd)
-                    destroyerLoop = False
-                elif confirmCoords == "no":
-                    pass
-                else:
-                    print("You must enter 'yes' or 'no'!")
-
-            
-            print_board_input_spacer()
             print("All ships successfully placed!")
             inputLoop = False
-            
 
+        elif userInput == "auto":
+            auto_place_all_ships()
+            
+            clear_terminal()
+            input_spacer_no_board()
+            print("YOUR SHIPS HAVE BEEN AUTOMATICALLY PLACED")
+            input_spacer_with_board()
+            inputLoop = False
 
         else:
-            print("You must enter 'yes' or 'exit'!")
-            break
+            print("You must enter 'yes', 'auto', or 'exit'!")
+        break
+    #break
+
+print("game loop end")
+    #### This is the next stage of the loop, where the AI's board must be populated
+    #### populate the enemyBoard using the auto placement function
+    #### Then, the user and AI will take turns firing shots
+    #### For initial implementation of turns, AI can just be the Hapless Seaman (eg, fires randomly)
+    #### - randomly generate a coordinate anywhere from 0,0 to 9,9
+    #### - keep track of previous shots and check against that list
+    #### - if that coord was fired at already, generate a new one
+    #### From there turns should be fairly trivial
+    #### - just need user input for shot selectioning using [A-J][1-10] format
+    #### Followed by simple checking logic and updating of board with hit and missed squares
+    #### Will also need tracking of ships sunk/remaining, for game end logic
+    #### - consider tracking number of hits and misses for accuracy stats of player and AI
+    #### Once this is complete, 
+
+
+
+
 
