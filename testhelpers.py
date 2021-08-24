@@ -196,6 +196,30 @@ def update_enemy_last_turn(outcome, coord):
 
 
 
+shipsHashMap = {}
+shipsHashMap['Carrier'] = 5, Fore.GREEN + 'AC' + Style.RESET_ALL
+shipsHashMap['Battleship'] = 4, Fore.GREEN + 'BS' + Style.RESET_ALL
+shipsHashMap['Cruiser'] = 3, Fore.GREEN + 'CR' + Style.RESET_ALL
+shipsHashMap['Submarine'] = 3, Fore.GREEN + 'SB' + Style.RESET_ALL
+shipsHashMap['Destroyer'] = 2, Fore.GREEN + 'DT' + Style.RESET_ALL
+
+
+testKeys = shipsHashMap.keys()
+#print(testKeys[0])
+
+listKeys = list(shipsHashMap.keys())
+print(listKeys[0])
+
+print(next(iter(shipsHashMap)))
+
+for i in range(5):
+    print(listKeys[i])
+ 
+
+shipNameList = list(shipsHashMap.keys())
+
+
+
 # For auto placement
 # worth considering refactoring for future speed improvements
         # check if beg and end empty first

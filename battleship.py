@@ -68,6 +68,17 @@ enemyTargets = []
 hitCounts = [0,0]
 
 
+# hash map for retrieving size of ships with their name as a key
+shipsHashMap = {}
+shipsHashMap['Carrier'] = 5, Fore.GREEN + 'AC' + Style.RESET_ALL
+shipsHashMap['Battleship'] = 4, Fore.GREEN + 'BS' + Style.RESET_ALL
+shipsHashMap['Cruiser'] = 3, Fore.GREEN + 'CR' + Style.RESET_ALL
+shipsHashMap['Submarine'] = 3, Fore.GREEN + 'SB' + Style.RESET_ALL
+shipsHashMap['Destroyer'] = 2, Fore.GREEN + 'DT' + Style.RESET_ALL
+
+shipNameList = list(shipsHashMap.keys())
+
+
 
 for x in range(10):
     gameBoard.append([openSea]*10)
@@ -156,17 +167,6 @@ def printTargetBoard():
             print("                           ██ = Unknown Ocean")
         else:
             print(*targetBoard[i], sep='  ')
-
-
-# hash map for retrieving size of ships with their name as a key
-shipsHashMap = {}
-shipsHashMap['Carrier'] = 5, Fore.GREEN + 'AC' + Style.RESET_ALL
-shipsHashMap['Battleship'] = 4, Fore.GREEN + 'BS' + Style.RESET_ALL
-shipsHashMap['Cruiser'] = 3, Fore.GREEN + 'CR' + Style.RESET_ALL
-shipsHashMap['Submarine'] = 3, Fore.GREEN + 'SB' + Style.RESET_ALL
-shipsHashMap['Destroyer'] = 2, Fore.GREEN + 'DT' + Style.RESET_ALL
-
-
 
 
 
@@ -392,70 +392,65 @@ def ship_input_loop(shipName):
             print("You must enter 'yes' or 'no'!")
 
 
+def player_turn_input():
+    print("It is your turn. Pick a square on the grid to target, of the form [A-J][1-10].")
+    print("For Example, to target the uppermost left corner, type A1.")
 
-def turn_input(user):
-    
-    if user == "player":
-        print("It is your turn. Pick a square on the grid to target, of the form [A-J][1-10].")
-        print("For Example, to target the uppermost left corner, type A1.")
+    gridTarget = None
+    rowTarget = None
+    colTarget = None
+    userFindingTarget = True
 
-        gridTarget = None
-        rowTarget = None
-        colTarget = None
-        userFindingTarget = True
+    while userFindingTarget:
+        inputTarget = input("Type the coordinate you want to target: ")
+        gridTarget = validate_user_coord(inputTarget)
+        rowTarget = gridTarget[0]
+        colTarget = gridTarget[1]
 
-        while userFindingTarget:
-            inputTarget = input("Type the coordinate you want to target: ")
-            gridTarget = validate_user_coord(inputTarget)
-            rowTarget = gridTarget[0]
-            colTarget = gridTarget[1]
-
-            if gridTarget in userTargets:
-                print("You have already entered this target, choose another.")
-            else:
-                print_stats_box()
-                userTargets.append(gridTarget)
-                if enemyBoard[rowTarget][colTarget] == openSea:
-                    targetBoard[rowTarget][colTarget] = missedShot
-                    print("")
-                    print(f"YOU MISSED! No enemy ship at {inputTarget}!")
-                else:
-                    targetBoard[rowTarget][colTarget] = shipStruck
-                    hitCounts[0] = hitCounts[0] + 1
-                    print("")
-                    print(f"YOU SCORED A HIT! Enemy ship struck at {inputTarget}!")
-                userFindingTarget = False
-
-    elif user == "enemy":
-        #print("It is the enemy's turn. They will attempt to strike one of your ships.")
-        randomTarget = None
-        randRow = None
-        randCol = None
-        enemyFindingTarget = True
-        while enemyFindingTarget:
-            randomTarget = generate_random_target()
-            randRow = randomTarget[0]
-            randCol = randomTarget[1]
-            if randomTarget not in enemyTargets:
-                enemyTargets.append(randomTarget)
-                enemyFindingTarget = False
-
-        if gameBoard[randRow][randCol] == openSea:
-            gameBoard[randRow][randCol] = missedShot
-            alphaRandMiss = coord_to_alphanumeric(randomTarget)
-            print(f"THE ENEMY MISSED! Their shot landed at {alphaRandMiss}!")
-            print("")
-            print("")
+        if gridTarget in userTargets:
+            print("You have already entered this target, choose another.")
         else:
-            gameBoard[randRow][randCol] = shipStruck
-            alphaRandHit = coord_to_alphanumeric(randomTarget)
-            hitCounts[1] = hitCounts[1] + 1
-            print(f"THE ENEMY SCORED A HIT! Your ship was struck at {alphaRandHit}!")
-            print("")
-            print("")
+            print_stats_box()
+            userTargets.append(gridTarget)
+            if enemyBoard[rowTarget][colTarget] == openSea:
+                targetBoard[rowTarget][colTarget] = missedShot
+                print("")
+                print(f"YOU MISSED! No enemy ship at {inputTarget}!")
+            else:
+                targetBoard[rowTarget][colTarget] = shipStruck
+                hitCounts[0] = hitCounts[0] + 1
+                print("")
+                print(f"YOU SCORED A HIT! Enemy ship struck at {inputTarget}!")
+            userFindingTarget = False
 
+
+def enemy_turn_input():
+    #print("It is the enemy's turn. They will attempt to strike one of your ships.")
+    randomTarget = None
+    randRow = None
+    randCol = None
+    enemyFindingTarget = True
+    while enemyFindingTarget:
+        randomTarget = generate_random_target()
+        randRow = randomTarget[0]
+        randCol = randomTarget[1]
+        if randomTarget not in enemyTargets:
+            enemyTargets.append(randomTarget)
+            enemyFindingTarget = False
+
+    if gameBoard[randRow][randCol] == openSea:
+        gameBoard[randRow][randCol] = missedShot
+        alphaRandMiss = coord_to_alphanumeric(randomTarget)
+        print(f"THE ENEMY MISSED! Their shot landed at {alphaRandMiss}!")
+        print("")
+        print("")
     else:
-        raise Exception("Must call turn_input with 'player' or 'enemy' as the argument!")
+        gameBoard[randRow][randCol] = shipStruck
+        alphaRandHit = coord_to_alphanumeric(randomTarget)
+        hitCounts[1] = hitCounts[1] + 1
+        print(f"THE ENEMY SCORED A HIT! Your ship was struck at {alphaRandHit}!")
+        print("")
+        print("")
 
 
 
@@ -552,30 +547,21 @@ while gameOn:
             inputLoop = False
         
         elif userInput == "yes":
-            print ("\033[A                                                              \033[A")
+            print ("\033[A                                                                                             \033[A")
             input_spacer_no_board()
             print("Ships can only be placed vertically or horizontally.")
             print("You will be asked for a pair of coordinates, beginning and end.")
             print("For horizontal placement, beginning should be the left of the two. For vertical, the upper of the two.")
             input_spacer_no_board()
+            
+            for i in range(5):
+                ship_input_loop(shipNameList[i])
+                input_spacer_with_board()
 
-            ship_input_loop("Carrier")
-            input_spacer_with_board()
-            ship_input_loop("Battleship")
-            input_spacer_with_board()
-            ship_input_loop("Cruiser")
-            input_spacer_with_board()
-            ship_input_loop("Submarine")
-            input_spacer_with_board()
-            ship_input_loop("Destroyer")
-            input_spacer_with_board()
-
-            print("All ships successfully placed!")
             inputLoop = False
 
         elif userInput == "auto":
             auto_place_all_ships(gameBoard)
-            
             clear_terminal()
             input_spacer_no_board()
             print("YOUR SHIPS HAVE BEEN AUTOMATICALLY PLACED")
@@ -584,7 +570,7 @@ while gameOn:
 
         else:
             print("You must enter 'yes', 'auto', or 'exit'!")
-        break
+        
     
     auto_place_all_ships(enemyBoard)
     clear_and_print_both_boards()
@@ -592,13 +578,14 @@ while gameOn:
     turnCounter = 0
     playerHits = 0
     enemyHits = 0
+
     while takingTurns:
         if playerHits == 17 or enemyHits == 17:
             takingTurns = False
+            gameOn = False
         turnCounter +=1
-        turn_input('player')
-        turn_input('enemy')
-        #print_stats_box()
+        player_turn_input()
+        enemy_turn_input()
         print_both_boards()
 
 
