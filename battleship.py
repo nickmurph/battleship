@@ -245,7 +245,7 @@ def place_ship(board, shipName, beg, end):
             for i in range(shipLength):
                 board[beg[0]+i][beg[1]] = shipBody
     else:
-        raise Exception("These coordinates are invalid!")
+        return False
 
 
 
@@ -276,23 +276,25 @@ def grid_num_to_ord(gridNum):
     return gridNum+65
 
 def validate_user_coord(user_coord):
-    row = user_coord[0]
-    if len(user_coord) == 2:
-        col = int(user_coord[1])
-    elif len(user_coord) == 3:
-        col = int(user_coord[1] + user_coord[2])
-    #print(row,col)
+    try:
+        row = user_coord[0]
+        if len(user_coord) == 2:
+            col = int(user_coord[1])
+        elif len(user_coord) == 3:
+            col = int(user_coord[1] + user_coord[2])
 
-    if len(user_coord) not in range(2,4):
-        raise Exception("User coordinate improper length")
-    
-    elif letter_to_ord(row) != 0 and col in range(1,11):
-        row = letter_to_ord(row)
-        row = ord_to_grid_num(row)
-        col = col -1
-        return (row, col)
-    else:
-        raise Exception("Either row or column input not acceptable")
+        if len(user_coord) not in range(2,4):
+            raise Exception("User coordinate improper length")
+        
+        elif letter_to_ord(row) != 0 and col in range(1,11):
+            row = letter_to_ord(row)
+            row = ord_to_grid_num(row)
+            col = col -1
+            return (row, col)
+        else:
+            raise Exception("Either row or column input not acceptable")
+    except:
+        return False
 
 def coord_to_alphanumeric(coord):
     row = coord[0]
@@ -384,8 +386,10 @@ def ship_input_loop(shipName):
         if confirmCoords == "yes":
             shipBeg = validate_user_coord(inputBeg)
             shipEnd = validate_user_coord(inputEnd)
-            place_ship(gameBoard, shipName, shipBeg, shipEnd)
-            shipLoop = False
+            if place_ship(gameBoard, shipName, shipBeg, shipEnd) != False:
+                shipLoop = False
+            else:
+                print("The coordinates you chose were invalid, try again.")
         elif confirmCoords == "no":
             pass
         else:
@@ -404,6 +408,9 @@ def player_turn_input():
     while userFindingTarget:
         inputTarget = input("Type the coordinate you want to target: ")
         gridTarget = validate_user_coord(inputTarget)
+        if gridTarget == False:
+            print("The given input was not a valid coordinate.")
+            continue
         rowTarget = gridTarget[0]
         colTarget = gridTarget[1]
 
@@ -423,6 +430,32 @@ def player_turn_input():
                 print(f"YOU SCORED A HIT! Enemy ship struck at {inputTarget}!")
             userFindingTarget = False
 
+def player_auto_turn_input():
+    randomTarget = None
+    randRow = None
+    randCol = None
+    userAutoFindingTarget = True
+    while userAutoFindingTarget:
+        randomTarget = generate_random_target()
+        randRow = randomTarget[0]
+        randCol = randomTarget[1]
+        if randomTarget not in userTargets:
+            userTargets.append(randomTarget)
+            userAutoFindingTarget = False
+    print_stats_box()
+    if enemyBoard[randRow][randCol] == openSea:
+        targetBoard[randRow][randCol] = missedShot
+        alphaRandMiss = coord_to_alphanumeric(randomTarget)
+        print(f"YOU MISSED! No enemy ship at {alphaRandMiss}!")
+        print("")
+        print("")
+    else:
+        targetBoard[randRow][randCol] = shipStruck
+        alphaRandHit = coord_to_alphanumeric(randomTarget)
+        hitCounts[0] = hitCounts[0] + 1
+        print(f"YOU SCORED A HIT! Enemy ship struck at {alphaRandHit}!")
+        print("")
+        print("")
 
 def enemy_turn_input():
     #print("It is the enemy's turn. They will attempt to strike one of your ships.")
@@ -501,11 +534,10 @@ def automatic_ship_placement(board, shipName):
         full_coords = generate_full_coords(randPair[0],randPair[1])
         if coords_occupied(board, full_coords) != True:
             place_ship(board, shipName, randPair[0], randPair[1])
-            #print("Succesfully placed ship on board")
             seekingValidPlacement = False
         else:
             #print("At least one of the coordinates is already occupied")
-            ...
+            pass
 
       
 
@@ -533,6 +565,7 @@ def generate_random_target():
 gameOn = True
 inputLoop = True
 takingTurns = True
+turnCounter = 0
 
 input_spacer_no_board()
 print_ascii_logo()
@@ -575,21 +608,21 @@ while gameOn:
     auto_place_all_ships(enemyBoard)
     clear_and_print_both_boards()
 
-    turnCounter = 0
-    playerHits = 0
-    enemyHits = 0
+    # uncomment this and the if else in the below while loop to enable automated player firing for quicker testing
+    #autoChoose = input("type autoChoose to have your firing solutions automated:")
 
-    while takingTurns:
-        if playerHits == 17 or enemyHits == 17:
+    while(takingTurns):
+        if hitCounts[0] == 17 or hitCounts[1] == 17:
             takingTurns = False
             gameOn = False
         turnCounter +=1
+        # if autoChoose == "autoChoose":
+        #     player_auto_turn_input()
+        # else:
+        #     player_turn_input()
         player_turn_input()
         enemy_turn_input()
         print_both_boards()
-
-
-
 
 
 print("game ended")
