@@ -609,23 +609,46 @@ while gameOn:
     clear_and_print_both_boards()
 
     # uncomment this and the if else in the below while loop to enable automated player firing for quicker testing
-    #autoChoose = input("type autoChoose to have your firing solutions automated:")
+    autoChoose = input("type auto to have your firing solutions automated or anything else to proceed normally: ")
 
-    while(takingTurns):
+    while takingTurns:
         if hitCounts[0] == 17 or hitCounts[1] == 17:
             takingTurns = False
-            gameOn = False
         turnCounter +=1
-        # if autoChoose == "autoChoose":
-        #     player_auto_turn_input()
-        # else:
-        #     player_turn_input()
-        player_turn_input()
+        if autoChoose == "auto":
+            player_auto_turn_input()
+        else:
+            player_turn_input()
+        #player_turn_input()
         enemy_turn_input()
         print_both_boards()
 
 
-print("game ended")
+    if hitCounts[0] > hitCounts[1]:
+        print("You sunk all of your opponents battleships and won the game.")
+    else:
+        print("The enemy sunk all of your battleships and won the game.")
+
+    playAgain = input("Would you like to play again? Type yes to play another round or anything else to exit: ")
+    if playAgain != 'yes':
+        gameOn = False
+    else:
+        inputLoop = True
+        takingTurns = True
+        turnCounter = 0
+        hitCounts = [0,0]
+        clear_terminal()
+        for x in range(10):
+            for y in range(10):
+                gameBoard[x][y] = openSea
+                enemyBoard[x][y] = openSea
+                targetBoard[x][y] = openSea
+        userTargets = []
+        enemyTargets = []
+        input_spacer_no_board()
+        print_ascii_logo()
+        input_spacer_with_board()
+
 
 
     #### GAME LOOP TO DO LIST

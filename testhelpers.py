@@ -220,6 +220,7 @@ shipNameList = list(shipsHashMap.keys())
 
 
 
+
 # For auto placement
 # worth considering refactoring for future speed improvements
         # check if beg and end empty first
