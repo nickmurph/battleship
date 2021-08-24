@@ -1,24 +1,21 @@
 import random
 import os
+import colorama
+from colorama import Fore, Style, init
+
+
+
+colorama.init(convert=True)
+
 
 
 # TO DO LIST
 #
-# Adopt more visually appealing grid print method from testhelpers.py
-## - settle on symbols for hits, misses, ocean, etc
-## - implement colored symbols with colorama?
+# break battleship.py up into several smaller files based on function categories
 #
-# Also adopt the three tiered approach to the gameboards from testhelpers.py
+# logic for registering sinkings of specific vessels, announcing to the player
 #
-# refactor relevant methods to take in a gameboard as an argument so all methods can be invoked on either players board
-#
-# next step in game loop will be player/AI taking turns (further details on this and next 3 points at bottom of game loop)
-#
-# which necessitates an interface for the player choosing their next shot
-#
-# logic for registering hits and sinkings, ending game
-#
-# initial AI, which will be blindly/randomly guessing shots
+# fix crashing on incorrect user inputs
 #
 # develop further AI models as outlined in notes
 #
@@ -41,8 +38,15 @@ import os
 ## - username/password good excuse to demonstrate proper implementation of password hashing/data storage, lays foundation for eventual GUI version
 ## - having player profiles would also allow for the tracking of tendencies -> future implementation of learning (or at least remembering) AI
 #
-
-
+#
+# eventual GUI extension, which will require some refactoring
+#
+# consider how much refactoring would be needed to implement an option to play SALVO:
+## Salvo is a variant on Battleship, with the following rule changes described by the official Milton Bradley instructions
+## each player fires 5 shots per turn instead of 1
+## if a player loses a ship, they fire one less shot per turn (ie, each surviving ship in the players fleet is firing once per turn)
+## an even more challenging version of Salvo involves not announcing which of your ships is hit
+#
 
 
 
@@ -51,32 +55,119 @@ import os
 #
 # GRID CREATION AND PRINTING, HASHMAP FOR SHIP LENGTHS
 #
-#
+# ██
 gameBoard = []
 enemyBoard = []
-openSea = 'O'
-shipBody = 'X'
-shipStruck = '%'
+targetBoard = []
+openSea = Fore.LIGHTCYAN_EX + '__' + Style.RESET_ALL
+shipBody = Fore.GREEN + 'QQ' + Style.RESET_ALL
+shipStruck = Fore.RED + 'XX' + Style.RESET_ALL
+missedShot = Fore.LIGHTCYAN_EX + '00' + Style.RESET_ALL
+userTargets = []
+enemyTargets = []
+hitCounts = [0,0]
+
+
 
 for x in range(10):
     gameBoard.append([openSea]*10)
     enemyBoard.append([openSea]*10)
+    targetBoard.append([openSea]*10)
+
+
+
 
 def printGameBoard():
+    print("           YOUR AREA OF OPERATIONS         ")
+    print("")
+    print("    1   2   3   4   5   6   7   8   9   1O ")
+    
     for i in range(10):
-        if i == 0:
-            print("    1    2    3    4    5    6    7    8    9    1O ")
         curLetter = chr(i+65)
-        print(curLetter + " " + str(gameBoard[i]))
+        print(curLetter + "   ", end="")
+        if i == 0:
+            print(*gameBoard[i], sep='  ')
+        elif i == 1:
+            print(*gameBoard[i], sep='  ', end='')
+            print("                           KEY:")
+        elif i == 2:
+            print(*gameBoard[i], sep='  ', end='')
+            print("                           AC = Aircraft Carrier")
+        elif i == 3:
+            print(*gameBoard[i], sep='  ', end='')
+            print("                           BS = Battleship")
+        elif i == 4:
+            print(*gameBoard[i], sep='  ', end='')
+            print("                           CR = Crusier")
+        elif i == 5:
+            print(*gameBoard[i], sep='  ', end='')
+            print("                           SB = Submarine")
+        elif i == 6:
+            print(*gameBoard[i], sep='  ', end='')
+            print("                           DT = Destroyer")
+        elif i == 7:
+            print(*gameBoard[i], sep='  ', end='')
+            print("                           XX = Damaged Ship")
+        elif i == 8:
+            print(*gameBoard[i], sep='  ', end='')
+            print("                           00 = Missed Shot")
+        elif i == 9:
+            print(*gameBoard[i], sep='  ', end='')
+            print("                           ██ = Empty Ocean")
+        else:
+            print(*gameBoard[i], sep='  ')
+
+
+def printGameBoardNoKey():
+    print("    1   2   3   4   5   6   7   8   9   1O ")
+    
+    for i in range(10):
+        curLetter = chr(i+65)
+        print(curLetter + "   ", end="")
+        print(*gameBoard[i], sep='  ')
+
+def printEnemyBoard():
+    print("    1   2   3   4   5   6   7   8   9   1O ")
+    for i in range(10):
+        curLetter = chr(i+65)
+        print(curLetter + "   ", end="")
+        print(*enemyBoard[i], sep='  ')
+
+
+
+def printTargetBoard():
+    print("       THE ENEMY'S AREA OF OPERATIONS      ")
+    print("")
+    print("    1   2   3   4   5   6   7   8   9   1O ")
+    for i in range(10):
+        curLetter = chr(i+65)
+        print(curLetter + "   ", end="")
+        if i == 1:
+            print(*targetBoard[i], sep='  ', end='')
+            print("                           KEY:")
+        elif i == 2:
+            print(*targetBoard[i], sep='  ', end='')
+            print("                           XX = Successful Hit")
+        elif i == 3:
+            print(*targetBoard[i], sep='  ', end='')
+            print("                           00 = Missed Shot")
+        elif i == 4:
+            print(*targetBoard[i], sep='  ', end='')
+            print("                           ██ = Unknown Ocean")
+        else:
+            print(*targetBoard[i], sep='  ')
 
 
 # hash map for retrieving size of ships with their name as a key
 shipsHashMap = {}
-shipsHashMap['Carrier'] = 5
-shipsHashMap['Battleship'] = 4
-shipsHashMap['Cruiser'] = 3
-shipsHashMap['Submarine'] = 3
-shipsHashMap['Destroyer'] = 2
+shipsHashMap['Carrier'] = 5, Fore.GREEN + 'AC' + Style.RESET_ALL
+shipsHashMap['Battleship'] = 4, Fore.GREEN + 'BS' + Style.RESET_ALL
+shipsHashMap['Cruiser'] = 3, Fore.GREEN + 'CR' + Style.RESET_ALL
+shipsHashMap['Submarine'] = 3, Fore.GREEN + 'SB' + Style.RESET_ALL
+shipsHashMap['Destroyer'] = 2, Fore.GREEN + 'DT' + Style.RESET_ALL
+
+
+
 
 
 
@@ -119,13 +210,13 @@ def generate_full_coords(beg, end):
     return full_coords
 
 #returns True if the coordinate sent as an argument already has a ship occupying it on the board
-def square_occupied(grid_tuple):
-    return gameBoard[grid_tuple[0]][grid_tuple[1]] == shipBody
+def square_occupied(board, grid_tuple):
+    return board[grid_tuple[0]][grid_tuple[1]] != openSea
 
-def coords_occupied(full_coords):
+def coords_occupied(board, full_coords):
     flag = False
     for coord in full_coords:
-        if square_occupied(coord):
+        if square_occupied(board, coord):
             flag = True
             #print("This coordinate, " + str(coord) + ", is already occupied!")
     return flag
@@ -136,22 +227,23 @@ def coords_occupied(full_coords):
 # Places a ship on the grid in the squares between beg and end
 # ARGS: string, tuple, tuple
 # 
-def place_ship(shipName, beg, end):
-    shipLength = shipsHashMap[shipName]
+def place_ship(board, shipName, beg, end):
+    shipLength = shipsHashMap[shipName][0]
+    shipBody = shipsHashMap[shipName][1]
 
     #this is a placement from left to right along a row, with beg as the left coordinates
     if in_same_row(beg,end) and get_col_diff(beg,end) == shipLength-1 and valid_col_bounds(beg,end):
         potential_coords = generate_full_coords(beg,end)
-        if coords_occupied(potential_coords) != True:
+        if coords_occupied(board, potential_coords) != True:
             for i in range(shipLength):
-                gameBoard[beg[0]][beg[1]+i] = shipBody
+                board[beg[0]][beg[1]+i] = shipBody
 
     #this is a placement from top to bottom along a column, with beg as the top coordinates
     elif in_same_column(beg,end) and get_row_diff(beg,end) == shipLength-1 and valid_row_bounds(beg,end):
         potential_coords = generate_full_coords(beg,end)
-        if coords_occupied(potential_coords) != True:
+        if coords_occupied(board, potential_coords) != True:
             for i in range(shipLength):
-                gameBoard[beg[0]+i][beg[1]] = shipBody
+                board[beg[0]+i][beg[1]] = shipBody
     else:
         raise Exception("These coordinates are invalid!")
 
@@ -166,19 +258,22 @@ def place_ship(shipName, beg, end):
 def letter_to_ord(ltr):
     if len(ltr) != 1:
         raise Exception("Letter string larger than 1")
-    elif ord(ltr) >= 65 and ord(ltr) <= 75:
+    elif ord(ltr) >= 65 and ord(ltr) < 75:
         return ord(ltr)
     else:
         raise Exception("Letter outside acceptable ord range")
 
 def ord_to_letter(num):
-    if num >= 65 and num <= 75:
+    if num >= 65 and num < 75:
         return chr(num)
     else:
         raise Exception("Letter outside acceptable ord range")
 
 def ord_to_grid_num(ordnum):
     return ordnum-65
+
+def grid_num_to_ord(gridNum):
+    return gridNum+65
 
 def validate_user_coord(user_coord):
     row = user_coord[0]
@@ -199,6 +294,14 @@ def validate_user_coord(user_coord):
     else:
         raise Exception("Either row or column input not acceptable")
 
+def coord_to_alphanumeric(coord):
+    row = coord[0]
+    col = coord[1]
+    row = grid_num_to_ord(row)
+    row = ord_to_letter(row)
+    col += 1
+    return row + (str(col))
+
 
 
 
@@ -211,7 +314,7 @@ def validate_user_coord(user_coord):
 def input_spacer_with_board():
     print("")
     print("")
-    printGameBoard()
+    printGameBoardNoKey()
     print("")
     print("")
 
@@ -223,6 +326,24 @@ def input_spacer_no_board():
 def clear_terminal():
     os.system('cls||clear')
 
+
+def clear_and_print_both_boards():
+    clear_terminal()
+    input_spacer_no_board()
+    input_spacer_no_board()
+    print_ascii_logo()
+    input_spacer_no_board()
+    printGameBoard()
+    input_spacer_no_board()
+    printTargetBoard()
+    input_spacer_no_board()
+
+def print_both_boards():
+    input_spacer_no_board()
+    printGameBoard()
+    input_spacer_no_board()
+    printTargetBoard()
+    input_spacer_no_board()
 
 def print_ascii_logo():
    print( """
@@ -236,11 +357,23 @@ def print_ascii_logo():
                                                                                             
                 """)
 
+
+def print_stats_box():
+    clear_terminal()
+    print_ascii_logo()
+    print(f"Turn Number: {turnCounter}")
+    print(f"Player hits: {hitCounts[0]}")
+    print(f"Enemy hits: {hitCounts[1]}")
+    input_spacer_no_board()
+
+
+
+
 def ship_input_loop(shipName):
     if shipName == "Carrier":
-        print("Your first ship is a " + shipName + ", " + str(shipsHashMap[shipName]) + " squares long.")
+        print("Your first ship is a " + shipName + ", " + str(shipsHashMap[shipName][0]) + " squares long.")
     else:
-        print("Your next ship is a " + shipName + ", " + str(shipsHashMap[shipName]) + " squares long.")
+        print("Your next ship is a " + shipName + ", " + str(shipsHashMap[shipName][0]) + " squares long.")
     
     shipLoop = True
     while shipLoop:
@@ -251,7 +384,7 @@ def ship_input_loop(shipName):
         if confirmCoords == "yes":
             shipBeg = validate_user_coord(inputBeg)
             shipEnd = validate_user_coord(inputEnd)
-            place_ship(shipName, shipBeg, shipEnd)
+            place_ship(gameBoard, shipName, shipBeg, shipEnd)
             shipLoop = False
         elif confirmCoords == "no":
             pass
@@ -259,6 +392,70 @@ def ship_input_loop(shipName):
             print("You must enter 'yes' or 'no'!")
 
 
+
+def turn_input(user):
+    
+    if user == "player":
+        print("It is your turn. Pick a square on the grid to target, of the form [A-J][1-10].")
+        print("For Example, to target the uppermost left corner, type A1.")
+
+        gridTarget = None
+        rowTarget = None
+        colTarget = None
+        userFindingTarget = True
+
+        while userFindingTarget:
+            inputTarget = input("Type the coordinate you want to target: ")
+            gridTarget = validate_user_coord(inputTarget)
+            rowTarget = gridTarget[0]
+            colTarget = gridTarget[1]
+
+            if gridTarget in userTargets:
+                print("You have already entered this target, choose another.")
+            else:
+                print_stats_box()
+                userTargets.append(gridTarget)
+                if enemyBoard[rowTarget][colTarget] == openSea:
+                    targetBoard[rowTarget][colTarget] = missedShot
+                    print("")
+                    print(f"YOU MISSED! No enemy ship at {inputTarget}!")
+                else:
+                    targetBoard[rowTarget][colTarget] = shipStruck
+                    hitCounts[0] = hitCounts[0] + 1
+                    print("")
+                    print(f"YOU SCORED A HIT! Enemy ship struck at {inputTarget}!")
+                userFindingTarget = False
+
+    elif user == "enemy":
+        #print("It is the enemy's turn. They will attempt to strike one of your ships.")
+        randomTarget = None
+        randRow = None
+        randCol = None
+        enemyFindingTarget = True
+        while enemyFindingTarget:
+            randomTarget = generate_random_target()
+            randRow = randomTarget[0]
+            randCol = randomTarget[1]
+            if randomTarget not in enemyTargets:
+                enemyTargets.append(randomTarget)
+                enemyFindingTarget = False
+
+        if gameBoard[randRow][randCol] == openSea:
+            gameBoard[randRow][randCol] = missedShot
+            alphaRandMiss = coord_to_alphanumeric(randomTarget)
+            print(f"THE ENEMY MISSED! Their shot landed at {alphaRandMiss}!")
+            print("")
+            print("")
+        else:
+            gameBoard[randRow][randCol] = shipStruck
+            alphaRandHit = coord_to_alphanumeric(randomTarget)
+            hitCounts[1] = hitCounts[1] + 1
+            print(f"THE ENEMY SCORED A HIT! Your ship was struck at {alphaRandHit}!")
+            print("")
+            print("")
+
+    else:
+        raise Exception("Must call turn_input with 'player' or 'enemy' as the argument!")
 
 
 
@@ -290,13 +487,11 @@ def generate_valid_vertical_placements(shipSize):
     return validVertList
 
 
-def automatic_ship_placement(shipName):
-    shipSize = shipsHashMap[shipName]
+def automatic_ship_placement(board, shipName):
+    shipSize = shipsHashMap[shipName][0]
     validHorzPlacements = generate_valid_horizontal_placements(shipSize)
     validVertPlacements = generate_valid_vertical_placements(shipSize)
-    
     totalPossibilities = len(validHorzPlacements) + len (validVertPlacements)
-    
     
     seekingValidPlacement = True
     while seekingValidPlacement:
@@ -309,8 +504,8 @@ def automatic_ship_placement(shipName):
             randPair = validVertPlacements[randNum-len(validHorzPlacements)]
 
         full_coords = generate_full_coords(randPair[0],randPair[1])
-        if coords_occupied(full_coords) != True:
-            place_ship(shipName, randPair[0], randPair[1])
+        if coords_occupied(board, full_coords) != True:
+            place_ship(board, shipName, randPair[0], randPair[1])
             #print("Succesfully placed ship on board")
             seekingValidPlacement = False
         else:
@@ -319,12 +514,18 @@ def automatic_ship_placement(shipName):
 
       
 
-def auto_place_all_ships():
-    automatic_ship_placement("Carrier")
-    automatic_ship_placement("Battleship")
-    automatic_ship_placement("Cruiser")
-    automatic_ship_placement("Submarine")
-    automatic_ship_placement("Destroyer")
+def auto_place_all_ships(board):
+    automatic_ship_placement(board, "Carrier")
+    automatic_ship_placement(board, "Battleship")
+    automatic_ship_placement(board, "Cruiser")
+    automatic_ship_placement(board, "Submarine")
+    automatic_ship_placement(board, "Destroyer")
+
+
+def generate_random_target():
+    rand1 = random.randint(0,9)
+    rand2 = random.randint(0,9)
+    return (rand1,rand2)
 
 
 
@@ -335,14 +536,12 @@ def auto_place_all_ships():
 #
 
 gameOn = True
+inputLoop = True
+takingTurns = True
 
 input_spacer_no_board()
-# print("Welcome to Battleship!")
 print_ascii_logo()
 input_spacer_with_board()
-
-
-inputLoop = True
 
 while gameOn:
         
@@ -375,7 +574,7 @@ while gameOn:
             inputLoop = False
 
         elif userInput == "auto":
-            auto_place_all_ships()
+            auto_place_all_ships(gameBoard)
             
             clear_terminal()
             input_spacer_no_board()
@@ -386,22 +585,33 @@ while gameOn:
         else:
             print("You must enter 'yes', 'auto', or 'exit'!")
         break
-    #break
+    
+    auto_place_all_ships(enemyBoard)
+    clear_and_print_both_boards()
 
-print("game loop end")
-    #### This is the next stage of the loop, where the AI's board must be populated
-    #### populate the enemyBoard using the auto placement function
-    #### Then, the user and AI will take turns firing shots
-    #### For initial implementation of turns, AI can just be the Hapless Seaman (eg, fires randomly)
-    #### - randomly generate a coordinate anywhere from 0,0 to 9,9
-    #### - keep track of previous shots and check against that list
-    #### - if that coord was fired at already, generate a new one
-    #### From there turns should be fairly trivial
-    #### - just need user input for shot selectioning using [A-J][1-10] format
-    #### Followed by simple checking logic and updating of board with hit and missed squares
-    #### Will also need tracking of ships sunk/remaining, for game end logic
-    #### - consider tracking number of hits and misses for accuracy stats of player and AI
-    #### Once this is complete, 
+    turnCounter = 0
+    playerHits = 0
+    enemyHits = 0
+    while takingTurns:
+        if playerHits == 17 or enemyHits == 17:
+            takingTurns = False
+        turnCounter +=1
+        turn_input('player')
+        turn_input('enemy')
+        #print_stats_box()
+        print_both_boards()
+
+
+
+
+
+print("game ended")
+
+
+    #### GAME LOOP TO DO LIST
+    #### Next up is tracking of ships sunk/remaining, for game end logic (rather than currently just detecting if a square is a hit or miss and reflecting that)
+    #### - consider tracking number of hits AND misses for accuracy stats of player and AI
+    #### Once this is complete, can begin implementing levels of AI logic
 
 
 

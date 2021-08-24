@@ -23,6 +23,13 @@ print(Fore.LIGHTBLACK_EX + 'THIS IS WHAT THIS COLOR LOOKS LIKE' + Style.RESET_AL
 print(Fore.LIGHTYELLOW_EX + 'THIS IS WHAT THIS COLOR LOOKS LIKE' + Style.RESET_ALL)
 
 
+
+
+# openSea = Fore.GREEN + '__' + Style.RESET_ALL
+# shipBody = 'QQ'
+# shipStruck = Fore.RED + 'XX' + Style.RESET_ALL
+# missedShot = Fore.YELLOW + '00' + Style.RESET_ALL
+
 def testhelperfunc(num):
     print("blerp" + str(num))
 
@@ -37,21 +44,13 @@ for x in range(10):
     targetBoard.append(['__']*10)
 
 
-
-# for x in range(0,5):
-#     gameBoard[x][0] = 'X'
-#     print(x,0)
-
-# print("""
-
-# ██████╗  █████╗ ████████╗████████╗██╗     ███████╗███████╗██╗  ██╗██╗██████╗ 
-# ██╔══██╗██╔══██╗╚══██╔══╝╚══██╔══╝██║     ██╔════╝██╔════╝██║  ██║██║██╔══██╗
-# ██████╔╝███████║   ██║      ██║   ██║     █████╗  ███████╗███████║██║██████╔╝
-# ██╔══██╗██╔══██║   ██║      ██║   ██║     ██╔══╝  ╚════██║██╔══██║██║██╔═══╝ 
-# ██████╔╝██║  ██║   ██║      ██║   ███████╗███████╗███████║██║  ██║██║██║     
-# ╚═════╝ ╚═╝  ╚═╝   ╚═╝      ╚═╝   ╚══════╝╚══════╝╚══════╝╚═╝  ╚═╝╚═╝╚═╝     
-                                                                             
-# """)
+# original board print function
+# def printGameBoard():
+#     for i in range(10):
+#         if i == 0:
+#             print("    1    2    3    4    5    6    7    8    9    1O ")
+#         curLetter = chr(i+65)
+#         print(curLetter + " " + str(gameBoard[i]))
 
 def printGameBoard():
     print("           YOUR AREA OF OPERATIONS         ")
@@ -97,6 +96,45 @@ def printGameBoard():
 
 
 
+
+boardPrintHashMap = {}
+boardPrintHashMap[1] = "                           KEY:"
+boardPrintHashMap[2] = "                           AC = Aircraft Carrier"
+boardPrintHashMap[3] = "                           BS = Battleship"
+boardPrintHashMap[4] = "                           CR = Crusier"
+boardPrintHashMap[5] = "                           SB = Submarine"
+boardPrintHashMap[6] = "                           DT = Destroyer"
+boardPrintHashMap[7] = "                           XX = Damaged Ship"
+boardPrintHashMap[8] = "                           00 = Missed Shot"
+boardPrintHashMap[9] = "                           ██ = Empty Ocean"
+
+
+
+def printGameBoardNoKey():
+    print("    1   2   3   4   5   6   7   8   9   1O ")
+    
+    for i in range(10):
+        curLetter = chr(i+65)
+        print(curLetter + "   ", end="")
+        print(*gameBoard[i], sep='  ', end="")
+        print(boardPrintHashMap[i])
+
+
+def printGameBoard2():
+    print("           YOUR AREA OF OPERATIONS         ")
+    print("")
+    print("    1   2   3   4   5   6   7   8   9   1O ")
+    
+    for i in range(10):
+        curLetter = chr(i+65)
+        print(curLetter + "   ", end="")
+        print(*gameBoard[i], sep='  ')
+        print()
+
+
+
+
+
 def printEnemyBoard():
     print("    1   2   3   4   5   6   7   8   9   1O ")
     for i in range(10):
@@ -126,148 +164,42 @@ def printTargetingBoard():
         else:
             print(*targetBoard[i], sep='  ')
 
-print("")
-print("")
-print("")
-print("")
-#printGameBoard()
 
 
-gameBoard[0][0] = 'AC'
-gameBoard[0][1] = 'AC'
-gameBoard[0][2] = 'AC'
-gameBoard[0][3] = 'AC'
-gameBoard[0][4] = 'AC'
+testSquare = Fore.YELLOW + '00' + Style.RESET_ALL
+def updateGivenBoard(board):
+    board[0][0] = testSquare
 
 
-gameBoard[1][7] = 'BS'
-gameBoard[2][7] = 'BS'
-gameBoard[3][7] = 'BS'
-gameBoard[4][7] = 'BS'
-
-
-gameBoard[5][4] = 'CR'
-gameBoard[5][5] = 'CR'
-gameBoard[5][6] = 'CR'
-
-
-gameBoard[7][0] = 'SB'
-gameBoard[7][1] = 'SB'
-gameBoard[7][2] = 'SB'
-
-
-gameBoard[9][7] = 'DT'
-gameBoard[9][8] = 'DT'
-
-
-
-enemyBoard[0][4] = 'XX'
-enemyBoard[0][5] = 'XX'
-enemyBoard[0][6] = 'XX'
-enemyBoard[0][7] = 'XX'
-enemyBoard[0][8] = 'XX'
-enemyBoard[2][4] = '00'
-
-
-
-targetBoard[0][4] = 'XX'
-targetBoard[0][5] = 'XX'
-targetBoard[0][6] = 'XX'
-targetBoard[0][7] = '██'
-targetBoard[0][8] = '██'
-targetBoard[2][4] = '██'
-printGameBoard()
-# print("")
-# print("")
-# print("")
-# print("")
-# printEnemyBoard()
-print("")
-print("")
-print("")
-print("")
+updateGivenBoard(targetBoard)
 printTargetingBoard()
-print("")
-print("")
 
 
 
 
+# print("LAST TURN RESULTS: ")
+# print(userLastTurn)
+# print(enemyLastTurn)
+
+def update_user_last_turn(outcome, coord):
+    if outcome == "hit":
+        userLastTurn = "HIT! You struck an enemy ship at {coord}!"
+    else:
+        userLastTurn = f"YOU MISSED! No enemy ship at {coord}!"
+
+def update_enemy_last_turn(outcome, coord):
+    if outcome == "hit":
+        enemyLastTurn = f"HIT! The enemy struck your ship at {coord}!"
+    else:
+        enemyLastTurn = f"THE ENEMY MISSED! Their shot landed harmlessly at {coord}!"
 
 
-# For AI placement
-# Give player option to randomize as well?
-# generate pairs of tuples (beg, end)
-# Randomly select one of those pairs for first ship and add it to the board
-# Randomly select next pair, checking that theres no overlap
+
+
+# For auto placement
 # worth considering refactoring for future speed improvements
         # check if beg and end empty first
         # if so use generate full funct and check those? O(1) to check any coordinate, and generate full is at most O(5)
         # using a hash map might better if board was theoretically infinite but there are hard limits for now
         # if the board is made dynamically resizable in future iteration and larger ships added there still won't be any lengths over 10 so "O(n)" means far less here
-
-def generate_valid_horizontal_placements(shipSize):
-    shipSizeOffset = shipSize -1
-    validHorzList = []
-    for row in range(10):
-        for col in range(10):
-            if col+shipSizeOffset < 10:
-                #print(str(row) + "," + str(col) + ",  " + str(row) +","+ str(col+shipSizeOffset))
-                begTuple = (row,col)
-                endTuple = (row, col+shipSizeOffset)
-                validHorzList.append((begTuple, endTuple))
-        #print("")
-    return validHorzList
-
-def generate_valid_vertical_placements(shipSize):
-    shipSizeOffset = shipSize -1
-    validVertList = []
-    for col in range(10):
-        for row in range(10):
-            if row+shipSizeOffset < 10:
-                #print(str(row) + "," + str(col) + ",  " + str(row+shipSizeOffset) +","+ str(col))
-                begTuple = (row,col)
-                endTuple = (row+shipSizeOffset, col)
-                validVertList.append((begTuple,endTuple))
-        #print("")
-    return validVertList
-
-
-#generate_valid_horizontal_placements(5)
-#generate_valid_vertical_placements(5)
-
-
-#print("█")
-
-
-#print(str(gameBoard[0]))
-#print(' '.join(gameBoard[0]))
-
-
-
-def generate_AI_placement(shipSize):
-    validHorzPlacements = generate_valid_horizontal_placements(shipSize)
-    validVertPlacements = generate_valid_vertical_placements(shipSize)
-    totalPossibilities = len(validHorzPlacements) + len (validVertPlacements)
-    randNum = int(random.uniform(0, totalPossibilities-1))
-    randPair = None
-    if randNum < len(validHorzPlacements):
-        randPair = validHorzPlacements[randNum]
-    else:
-        randPair = validVertPlacements[randNum-len(validHorzPlacements)]
-    #print(randPair)
-
-
-
-
-
-#generate_AI_placement(5)
-
-# carrierPlacementsH = generate_valid_vertical_placements(5)
-# print(len(carrierPlacementsH))
-# print(carrierPlacementsH[0])
-# print(carrierPlacementsH[0][0])
-# print(carrierPlacementsH[0][0][0])
-
-
 
