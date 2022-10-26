@@ -181,14 +181,21 @@ printTargetingBoard()
 # print(userLastTurn)
 # print(enemyLastTurn)
 
+# global userLastTurn
+# global enemyLastTurn
+userLastTurn = "temp"
+enemyLastTurn = "temp"
+
 def update_user_last_turn(outcome, coord):
     if outcome == "hit":
-        userLastTurn = "HIT! You struck an enemy ship at {coord}!"
+        global userLastTurn
+        userLastTurn = f"HIT! You struck an enemy ship at {coord}!"
     else:
         userLastTurn = f"YOU MISSED! No enemy ship at {coord}!"
 
 def update_enemy_last_turn(outcome, coord):
     if outcome == "hit":
+        global enemyLastTurn
         enemyLastTurn = f"HIT! The enemy struck your ship at {coord}!"
     else:
         enemyLastTurn = f"THE ENEMY MISSED! Their shot landed harmlessly at {coord}!"
@@ -217,6 +224,51 @@ for i in range(5):
  
 
 shipNameList = list(shipsHashMap.keys())
+
+
+print("")
+print("")
+print("")
+print("")
+testBool = 'K' in "ABCDEFGHIJ"
+print(testBool)
+
+
+
+def is_valid_alphanum(inputStr):
+    if type(inputStr) != type(""):
+        return False
+    elif len(inputStr) not in range(2,4):
+        return False
+    elif inputStr[0] not in "ABCDEFGHIJ":
+        return False
+    elif int(inputStr[1]) not in range(1,11):
+        return False
+    elif len(inputStr) == 3 and int(inputStr[1] + inputStr[2]) not in range (1,11):
+        return False
+    else:
+        return True
+
+print(is_valid_alphanum('A1'))
+print(is_valid_alphanum('A10'))
+print(is_valid_alphanum('J1'))
+print(is_valid_alphanum('J10'))
+print("")
+print(is_valid_alphanum('A11'))
+print(is_valid_alphanum('A0'))
+print(is_valid_alphanum('J'))
+print(is_valid_alphanum(True))
+print(is_valid_alphanum(111))
+
+
+
+print("")
+print(userLastTurn)
+print(enemyLastTurn)
+update_user_last_turn("hit", 'A3')
+update_enemy_last_turn("miss", 'J4')
+print(userLastTurn)
+print(enemyLastTurn)
 
 
 

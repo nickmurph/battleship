@@ -275,7 +275,22 @@ def ord_to_grid_num(ordnum):
 def grid_num_to_ord(gridNum):
     return gridNum+65
 
-def validate_user_coord(user_coord):
+def is_valid_alphanum(inputStr):
+    if type(inputStr) != type(""):
+        return False
+    elif len(inputStr) not in range(2,4):
+        return False
+    elif inputStr[0] not in "ABCDEFGHIJ":
+        return False
+    elif int(inputStr[1]) not in range(1,11):
+        return False
+    elif len(inputStr) == 3 and int(inputStr[1] + inputStr[2]) not in range (1,11):
+        return False
+    else:
+        return True
+
+
+def process_alphanum_to_coord(user_coord):
     try:
         row = user_coord[0]
         if len(user_coord) == 2:
@@ -360,6 +375,22 @@ def print_ascii_logo():
                 """)
 
 
+
+def print_ascii_game_over():
+    print("""
+
+                ██████╗  █████╗ ███╗   ███╗███████╗     ██████╗ ██╗   ██╗███████╗██████╗ 
+                ██╔════╝ ██╔══██╗████╗ ████║██╔════╝    ██╔═══██╗██║   ██║██╔════╝██╔══██╗
+                ██║  ███╗███████║██╔████╔██║█████╗      ██║   ██║██║   ██║█████╗  ██████╔╝
+                ██║   ██║██╔══██║██║╚██╔╝██║██╔══╝      ██║   ██║╚██╗ ██╔╝██╔══╝  ██╔══██╗
+                ╚██████╔╝██║  ██║██║ ╚═╝ ██║███████╗    ╚██████╔╝ ╚████╔╝ ███████╗██║  ██║
+                ╚═════╝ ╚═╝  ╚═╝╚═╝     ╚═╝╚══════╝     ╚═════╝   ╚═══╝  ╚══════╝╚═╝  ╚═╝
+                                                                          
+     """)
+
+
+
+
 def print_stats_box():
     clear_terminal()
     print_ascii_logo()
@@ -367,6 +398,8 @@ def print_stats_box():
     print(f"Player hits: {hitCounts[0]}")
     print(f"Enemy hits: {hitCounts[1]}")
     input_spacer_no_board()
+    print(userLastTurn)
+    print(enemyLastTurn)
 
 
 
@@ -380,23 +413,24 @@ def ship_input_loop(shipName):
     shipLoop = True
     while shipLoop:
         inputBeg = input("Type the beginning coordinate: ")
+        while not is_valid_alphanum(inputBeg):
+            inputBeg = input("Invalid coordinate. Type a valid beginning coordinate, of the form [A-J][1-10]: ")
         inputEnd = input("Type the ending coordinate: ")
-        print("Are your sure you want to start from " + inputBeg + " and end at " + inputEnd +  "?")
-        confirmCoords = input("Type yes to continue or no to enter new coordinates: ")
-        if confirmCoords == "yes":
-            shipBeg = validate_user_coord(inputBeg)
-            shipEnd = validate_user_coord(inputEnd)
-            if place_ship(gameBoard, shipName, shipBeg, shipEnd) != False:
-                shipLoop = False
-            else:
-                print("The coordinates you chose were invalid, try again.")
-        elif confirmCoords == "no":
-            pass
+        while not is_valid_alphanum(inputEnd):
+            inputEnd = input("Invalid coordinate. Type a valid ending coordinate, of the form [A-J][1-10]: ")
+
+        inputBeg = process_alphanum_to_coord(inputBeg)
+        inputEnd = process_alphanum_to_coord(inputEnd)
+
+        if place_ship(gameBoard, shipName, inputBeg, inputEnd) != False:
+            shipLoop = False
         else:
-            print("You must enter 'yes' or 'no'!")
+            print("The coordinates you chose were sized improperly or occupied!")
+            print(f"try again with coordinates {shipsHashMap[shipName][0]} spaces apart, vertically or horizontally.")
 
 
-def player_turn_input():
+
+def player_manual_turn_input():
     print("It is your turn. Pick a square on the grid to target, of the form [A-J][1-10].")
     print("For Example, to target the uppermost left corner, type A1.")
 
@@ -407,7 +441,7 @@ def player_turn_input():
 
     while userFindingTarget:
         inputTarget = input("Type the coordinate you want to target: ")
-        gridTarget = validate_user_coord(inputTarget)
+        gridTarget = process_alphanum_to_coord(inputTarget)
         if gridTarget == False:
             print("The given input was not a valid coordinate.")
             continue
@@ -417,17 +451,17 @@ def player_turn_input():
         if gridTarget in userTargets:
             print("You have already entered this target, choose another.")
         else:
-            print_stats_box()
             userTargets.append(gridTarget)
             if enemyBoard[rowTarget][colTarget] == openSea:
                 targetBoard[rowTarget][colTarget] = missedShot
                 print("")
-                print(f"YOU MISSED! No enemy ship at {inputTarget}!")
+                global userLastTurn
+                userLastTurn = f"YOU MISSED! No enemy ship at {inputTarget}!"
             else:
                 targetBoard[rowTarget][colTarget] = shipStruck
                 hitCounts[0] = hitCounts[0] + 1
                 print("")
-                print(f"YOU SCORED A HIT! Enemy ship struck at {inputTarget}!")
+                userLastTurn = f"YOU SCORED A HIT! Enemy ship struck at {inputTarget}!"
             userFindingTarget = False
 
 def player_auto_turn_input():
@@ -442,23 +476,22 @@ def player_auto_turn_input():
         if randomTarget not in userTargets:
             userTargets.append(randomTarget)
             userAutoFindingTarget = False
-    print_stats_box()
     if enemyBoard[randRow][randCol] == openSea:
         targetBoard[randRow][randCol] = missedShot
         alphaRandMiss = coord_to_alphanumeric(randomTarget)
-        print(f"YOU MISSED! No enemy ship at {alphaRandMiss}!")
+        global userLastTurn
+        userLastTurn = f"YOU MISSED! No enemy ship at {alphaRandMiss}!"
         print("")
         print("")
     else:
         targetBoard[randRow][randCol] = shipStruck
         alphaRandHit = coord_to_alphanumeric(randomTarget)
         hitCounts[0] = hitCounts[0] + 1
-        print(f"YOU SCORED A HIT! Enemy ship struck at {alphaRandHit}!")
+        userLastTurn = f"YOU SCORED A HIT! Enemy ship struck at {alphaRandHit}!"
         print("")
         print("")
 
 def enemy_turn_input():
-    #print("It is the enemy's turn. They will attempt to strike one of your ships.")
     randomTarget = None
     randRow = None
     randCol = None
@@ -469,22 +502,22 @@ def enemy_turn_input():
         randCol = randomTarget[1]
         if randomTarget not in enemyTargets:
             enemyTargets.append(randomTarget)
-            enemyFindingTarget = False
+            enemyFindingTarget = False   
 
     if gameBoard[randRow][randCol] == openSea:
         gameBoard[randRow][randCol] = missedShot
         alphaRandMiss = coord_to_alphanumeric(randomTarget)
-        print(f"THE ENEMY MISSED! Their shot landed at {alphaRandMiss}!")
+        global enemyLastTurn
+        enemyLastTurn = f"THE ENEMY MISSED! Their shot landed at {alphaRandMiss}!"
         print("")
         print("")
     else:
         gameBoard[randRow][randCol] = shipStruck
         alphaRandHit = coord_to_alphanumeric(randomTarget)
         hitCounts[1] = hitCounts[1] + 1
-        print(f"THE ENEMY SCORED A HIT! Your ship was struck at {alphaRandHit}!")
+        enemyLastTurn = f"THE ENEMY SCORED A HIT! Your ship was struck at {alphaRandHit}!"
         print("")
         print("")
-
 
 
 #
@@ -610,24 +643,41 @@ while gameOn:
 
     # uncomment this and the if else in the below while loop to enable automated player firing for quicker testing
     autoChoose = input("type auto to have your firing solutions automated or anything else to proceed normally: ")
-
     while takingTurns:
+        turnCounter +=1
         if hitCounts[0] == 17 or hitCounts[1] == 17:
             takingTurns = False
-        turnCounter +=1
-        if autoChoose == "auto":
-            player_auto_turn_input()
+            print_stats_box()
+            print_both_boards()
         else:
-            player_turn_input()
-        #player_turn_input()
-        enemy_turn_input()
-        print_both_boards()
+            if autoChoose == "auto":
+                player_auto_turn_input()
+            else:
+                player_manual_turn_input()
+            #player_auto_turn_input()
+        if hitCounts[0] == 17 or hitCounts[1] == 17:
+            takingTurns = False
+            print_stats_box()
+            print_both_boards()
+        else:
+            enemy_turn_input()
+        if hitCounts[0] == 17 or hitCounts[1] == 17:
+            takingTurns = False
+            print_stats_box()
+            print_both_boards()
+        else:
+            print_stats_box()
+            print_both_boards()
 
-
+    input_spacer_no_board()
+    print_ascii_game_over()
+    input_spacer_no_board()
     if hitCounts[0] > hitCounts[1]:
         print("You sunk all of your opponents battleships and won the game.")
+        print("")
     else:
         print("The enemy sunk all of your battleships and won the game.")
+        print("")
 
     playAgain = input("Would you like to play again? Type yes to play another round or anything else to exit: ")
     if playAgain != 'yes':
