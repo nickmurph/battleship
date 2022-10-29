@@ -10,15 +10,15 @@ colorama.init(convert=True)
 
 
 # TO DO LIST
-#
+
 # break battleship.py up into several smaller files based on function categories
-#
+
 # logic for registering sinkings of specific vessels, announcing to the player
-#
+
 # fix crashing on incorrect user inputs
-#
+
 # develop further AI models as outlined in notes
-#
+
 # AI levels: Hapless Seaman, Admiral Nelson, Fleet Admiral Nimitz
 # # Hapless Seaman: This man would be out of his depth commanding a tugboat. 
 # # Happy will give random fire orders while cowering beneath deck.
@@ -28,24 +28,24 @@ colorama.init(convert=True)
 # #
 # # Fleet Admiral Nimitz: The greatest admiral of WW2, and the last to hold the title of Fleet Admiral. 
 # # Nimitz will offer you the toughest challenge of all (more advanced logic re: traversing the grid, future implementation of remembering player tendencies?)
-#
-#
+
+
 # consider refactoring hardcoded 10x10 grid and corresponding logic (eg, checking if, for grid coordinate x, 0 >= x <= 9) into a gridSize variable
 # this will allow for arbitrarily scaling the battleship board if a future feature with different grid sizes is implemented
-#
-#
+
+
 # player/profile framework of some sort
-## - username/password good excuse to demonstrate proper implementation of password hashing/data storage, lays foundation for eventual GUI version
-## - having player profiles would also allow for the tracking of tendencies -> future implementation of learning (or at least remembering) AI
-#
-#
+# # - username/password good excuse to demonstrate proper implementation of password hashing/data storage, lays foundation for eventual GUI version
+# # - having player profiles would also allow for the tracking of tendencies -> future implementation of learning (or at least remembering) AI
+
+
 # eventual GUI extension, which will require some refactoring
-#
+
 # consider how much refactoring would be needed to implement an option to play SALVO:
-## Salvo is a variant on Battleship, with the following rule changes described by the official Milton Bradley instructions
-## each player fires 5 shots per turn instead of 1
-## if a player loses a ship, they fire one less shot per turn (ie, each surviving ship in the players fleet is firing once per turn)
-## an even more challenging version of Salvo involves not announcing which of your ships is hit
+# # Salvo is a variant on Battleship, with the following rule changes described by the official Milton Bradley instructions
+# # each player fires 5 shots per turn instead of 1
+# # if a player loses a ship, they fire one less shot per turn (ie, each surviving ship in the players fleet is firing once per turn)
+# # an even more challenging version of Salvo involves not announcing which of your ships is hit
 #
 
 
@@ -66,7 +66,8 @@ missedShot = Fore.LIGHTCYAN_EX + '00' + Style.RESET_ALL
 userTargets = []
 enemyTargets = []
 hitCounts = [0,0]
-
+enemyGridStartPos = [0,-1]
+#enemyGridStartPos = generate_random_target()
 
 # hash map for retrieving size of ships with their name as a key
 shipsHashMap = {}
@@ -491,29 +492,77 @@ def player_auto_turn_input():
         print("")
         print("")
 
+#currentPos is a tuple of 
+def traverseGrid(currentPos, leftOrRight, upOrDown, jumpInterval):
+    nextTarget = currentPos
+    colDirection = leftOrRight
+    rowDirection = upOrDown
+    jump = jumpInterval
+
+    if colDirection == "right" and rowDirection == "down":
+        nextTarget[1] = nextTarget[1] + jump
+        if nextTarget[1] > 9:
+            nextTarget[0] = nextTarget[0] + jump
+            nextTarget[1] = 0
+
+    elif colDirection == "left" and rowDirection == "down":
+        nextTarget[1] = nextTarget[1] - jump
+        if nextTarget[1] > 9:
+            nextTarget[0] = nextTarget[0] + jump
+            nextTarget[1] = 0
+
+    
+    return [0,0]
+
+
+# Each time the enemy has a turn, they will select a coordinate in the while loop and then that shot is validated as either a miss or hot
 def enemy_turn_input():
-    randomTarget = None
-    randRow = None
-    randCol = None
+    currentTarget = None
+    targetRow = None
+    targetCol = None
     enemyFindingTarget = True
+    enemyMode = ['random'] # random, grid, or kill are the acceptable choices
+
+    # generate a random coordinate and check that it hasn't been fired at before
+    # if it has, repeat the loop and generate a new one
+    # if it hasn't, exit the loop by setting the enemyFindingTarget flag to false
     while enemyFindingTarget:
-        randomTarget = generate_random_target()
-        randRow = randomTarget[0]
-        randCol = randomTarget[1]
-        if randomTarget not in enemyTargets:
-            enemyTargets.append(randomTarget)
+
+        #random search
+        currentTarget = generate_random_target()
+        targetRow = currentTarget[0]
+        targetCol = currentTarget[1]
+        if currentTarget not in enemyTargets:
+            enemyTargets.append(currentTarget)
             enemyFindingTarget = False   
 
-    if gameBoard[randRow][randCol] == openSea:
-        gameBoard[randRow][randCol] = missedShot
-        alphaRandMiss = coord_to_alphanumeric(randomTarget)
+        #grid search
+        # enemyGridStartPos = [0,-1]
+        
+
+        #
+        # do stuff here
+        # 
+
+        #enemyFindingTarget = False
+
+        #post-hit kill search
+
+
+    # proceeding with the coordinate previously generated as our firing solution
+    #  if no ship is there, mark the corresponding square in the gameBoard as a missed shot
+    # if the coordinate is not empty sea, then it must be a hit
+    # increment the hitcount and inform the player the AI has struck a ship 
+    if gameBoard[targetRow][targetCol] == openSea:
+        gameBoard[targetRow][targetCol] = missedShot
+        alphaRandMiss = coord_to_alphanumeric(currentTarget)
         global enemyLastTurn
         enemyLastTurn = f"THE ENEMY MISSED! Their shot landed at {alphaRandMiss}!"
         print("")
         print("")
     else:
-        gameBoard[randRow][randCol] = shipStruck
-        alphaRandHit = coord_to_alphanumeric(randomTarget)
+        gameBoard[targetRow][targetCol] = shipStruck
+        alphaRandHit = coord_to_alphanumeric(currentTarget)
         hitCounts[1] = hitCounts[1] + 1
         enemyLastTurn = f"THE ENEMY SCORED A HIT! Your ship was struck at {alphaRandHit}!"
         print("")
