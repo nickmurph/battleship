@@ -12,14 +12,11 @@ from bs_convhelpers import process_alphanum_to_coord, coord_to_alphanumeric, is_
 from bs_gridhelpers import generate_random_target
 from bs_shipplacement import place_ship
 # from battleship import get_current_game
-import battleship
-
-userLastTurn = None
-
-
+import bs_global_hub
 
 def player_manual_turn_input():
-    game = battleship.get_current_game()
+    # game = battleship.get_current_game()
+    game = bs_global_hub.get_game_pointer()
     # userTargets = game.userTargets
     # enemyBoard = game.enemyBoard
     # targetBoard = game.targetBoard
@@ -64,7 +61,8 @@ def player_manual_turn_input():
 
 
 def player_auto_turn_input():
-    game = battleship.get_current_game()
+    # game = battleship.get_current_game()
+    game = bs_global_hub.get_game_pointer()
     randomTarget = None
     randRow = None
     randCol = None
@@ -94,7 +92,8 @@ def player_auto_turn_input():
 
 
 def ship_input_loop(shipName):
-    game = battleship.get_current_game()
+    # game = battleship.get_current_game()
+    game = bs_global_hub.get_game_pointer()
     shipsHashMap = game.shipsHashMap
 
     if shipName == "Carrier":

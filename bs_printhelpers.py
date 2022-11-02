@@ -11,15 +11,15 @@ from bs_globalvars import *
 # from bs_enemyactions import enemyLastTurn
 # from bs_playeractions import userLastTurn
 # from battleship import get_current_game
-import battleship
+#import battleship
 import bs_enemyactions
 import bs_playeractions
-import main
-
+import bs_global_hub
 
 
 def printGameBoard():
-    game = battleship.get_current_game()
+    # game = battleship.get_current_game()
+    game = bs_global_hub.get_game_pointer()
     gameBoard = game.gameBoard
     print("           YOUR AREA OF OPERATIONS         ")
     print("")
@@ -63,8 +63,9 @@ def printGameBoard():
 
 
 def printGameBoardNoKey():
-    #game = battleship.get_current_game()
-    game = main.get_bs_logic()
+    # game = battleship.get_current_game()
+    game = bs_global_hub.get_game_pointer()
+    # game = main.get_bs_logic()
     gameBoard = game.gameBoard
 
     print("    1   2   3   4   5   6   7   8   9   1O ")
@@ -76,7 +77,8 @@ def printGameBoardNoKey():
 
 
 def printEnemyBoard():
-    game = battleship.get_current_game()
+    # game = battleship.get_current_game()
+    game = bs_global_hub.get_game_pointer()
     enemyBoard = game.enemyBoard
 
     print("    1   2   3   4   5   6   7   8   9   1O ")
@@ -88,7 +90,8 @@ def printEnemyBoard():
 
 
 def printTargetBoard():
-    game = battleship.get_current_game()
+    # game = battleship.get_current_game()
+    game = bs_global_hub.get_game_pointer()
     targetBoard = game.targetBoard
 
     print("       THE ENEMY'S AREA OF OPERATIONS      ")
@@ -177,15 +180,16 @@ def print_ascii_game_over():
      """)
 
 
-def clear_and_print_welcome_screen():
-    clear_terminal()
+def print_welcome_screen():
+    # clear_terminal()
     input_spacer_no_board()
     print_ascii_logo()
     input_spacer_with_board()
 
 
 def print_stats_box():
-    game = battleship.get_current_game()
+    # game = battleship.get_current_game()
+    game = bs_global_hub.get_game_pointer()
     
     clear_terminal()
     print_ascii_logo()

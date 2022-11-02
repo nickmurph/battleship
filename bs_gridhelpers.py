@@ -8,7 +8,8 @@ import random
 # from battleship import openSea
 from bs_globalvars import *
 # from battleship import get_current_game
-import battleship
+#import battleship
+import bs_global_hub
 
 # Returns True if two x,y tuples are in the same row
 def in_same_row(beg, end):
@@ -44,7 +45,8 @@ def generate_full_coords(beg, end):
 
 #returns True if the coordinate sent as an argument already has a ship occupying it on the board
 def square_occupied(board, grid_tuple):
-    game = battleship.get_current_game()
+    # game = battleship.get_current_game()
+    game = bs_global_hub.get_game_pointer()
     return board[grid_tuple[0]][grid_tuple[1]] != game.openSea
 
 def coords_occupied(board, full_coords):
