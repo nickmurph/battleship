@@ -132,3 +132,8 @@ dmypy.json
 #misc ignored files
 testhelpers.py
 battleship-notes.txt
+notes.txt
+notes2.txt
+looptimer.py
+to-do.txt
+test.py
