@@ -7,8 +7,10 @@
 import random
 # from battleship import shipsHashMap
 from bs_globalvars import *
-from bs_gridhelpers import in_same_row, in_same_column, coords_occupied, get_col_diff, get_row_diff, generate_full_coords, valid_row_bounds, valid_col_bounds
-
+# from bs_gridhelpers import in_same_row, in_same_column, coords_occupied, get_col_diff, get_row_diff, generate_full_coords, valid_row_bounds, valid_col_bounds
+from bs_gridhelpers import *
+# from battleship import get_current_game
+import battleship
 
 def generate_valid_horizontal_placements(shipSize):
     shipSizeOffset = shipSize -1
@@ -37,8 +39,9 @@ def generate_valid_vertical_placements(shipSize):
 # ARGS: string, tuple, tuple
 # 
 def place_ship(board, shipName, beg, end):
-    shipLength = shipsHashMap[shipName][0]
-    shipBody = shipsHashMap[shipName][1]
+    game = battleship.get_current_game()
+    shipLength = game.shipsHashMap[shipName][0]
+    shipBody = game.shipsHashMap[shipName][1]
 
     #this is a placement from left to right along a row, with beg as the left coordinates
     if in_same_row(beg,end) and get_col_diff(beg,end) == shipLength-1 and valid_col_bounds(beg,end):
@@ -58,7 +61,8 @@ def place_ship(board, shipName, beg, end):
 
         
 def automatic_ship_placement(board, shipName):
-    shipSize = shipsHashMap[shipName][0]
+    game = battleship.get_current_game()
+    shipSize = game.shipsHashMap[shipName][0]
     validHorzPlacements = generate_valid_horizontal_placements(shipSize)
     validVertPlacements = generate_valid_vertical_placements(shipSize)
     totalPossibilities = len(validHorzPlacements) + len (validVertPlacements)

@@ -8,6 +8,8 @@ import random
 # from battleship import enemyTargets, openSea, missedShot, shipStruck, hitCounts
 from bs_globalvars import *
 from bs_convhelpers import coord_to_alphanumeric
+# from battleship import get_current_game
+import battleship
 
 enemyLastTurn = None
 
@@ -51,6 +53,7 @@ def traverseGrid(currentPos, leftOrRight, upOrDown, jumpInterval):
 
 # Each time the enemy has a turn, they will select a coordinate in the while loop and then that shot is validated as either a miss or hot
 def enemy_turn_input():
+    game = battleship.get_current_game()
     global enemyLastTurn
     currentTarget = None
     targetRow = None
@@ -77,7 +80,7 @@ def enemy_turn_input():
         enemyGridPos = traverseGrid(enemyGridPos,"right","down",2)
         targetRow = enemyGridPos[0]
         targetCol = enemyGridPos[1]
-        if enemyGridPos not in enemyTargets:
+        if enemyGridPos not in game.enemyTargets:
             enemyGridPos.append(enemyGridPos)
             enemyFindingTarget = False   
 
@@ -104,18 +107,18 @@ def enemy_turn_input():
         targetCol = enemyGridPos[1]
     #print(targetRow,targetCol)
 
-    if gameBoard[targetRow][targetCol] == openSea:
-        gameBoard[targetRow][targetCol] = missedShot
+    if game.gameBoard[targetRow][targetCol] == game.openSea:
+        game.gameBoard[targetRow][targetCol] = game.missedShot
         #alphaRandMiss = coord_to_alphanumeric(currentTarget)
         alphaRandMiss = coord_to_alphanumeric(enemyGridPos)
         enemyLastTurn = f"THE ENEMY MISSED! Their shot landed at {alphaRandMiss}!"
         print("")
         print("")
     else:
-        gameBoard[targetRow][targetCol] = shipStruck
+        game.gameBoard[targetRow][targetCol] = game.shipStruck
         #alphaRandHit = coord_to_alphanumeric(currentTarget)
         alphaRandHit = coord_to_alphanumeric(enemyGridPos)
-        hitCounts[1] = hitCounts[1] + 1
+        game.hitCounts[1] = game.hitCounts[1] + 1
         enemyLastTurn = f"THE ENEMY SCORED A HIT! Your ship was struck at {alphaRandHit}!"
         print("")
         print("")

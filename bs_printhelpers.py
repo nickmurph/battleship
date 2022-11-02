@@ -8,12 +8,19 @@ import os
 # from battleship import gameBoard, enemyBoard, targetBoard
 # from battleship import turnCounter, hitCounts
 from bs_globalvars import *
-from bs_enemyactions import enemyLastTurn
-from bs_playeractions import userLastTurn
+# from bs_enemyactions import enemyLastTurn
+# from bs_playeractions import userLastTurn
+# from battleship import get_current_game
+import battleship
+import bs_enemyactions
+import bs_playeractions
+import main
 
 
 
 def printGameBoard():
+    game = battleship.get_current_game()
+    gameBoard = game.gameBoard
     print("           YOUR AREA OF OPERATIONS         ")
     print("")
     print("    1   2   3   4   5   6   7   8   9   1O ")
@@ -54,15 +61,24 @@ def printGameBoard():
             print(*gameBoard[i], sep='  ')
 
 
+
 def printGameBoardNoKey():
+    #game = battleship.get_current_game()
+    game = main.get_bs_logic()
+    gameBoard = game.gameBoard
+
     print("    1   2   3   4   5   6   7   8   9   1O ")
-    
     for i in range(10):
         curLetter = chr(i+65)
         print(curLetter + "   ", end="")
         print(*gameBoard[i], sep='  ')
 
+
+
 def printEnemyBoard():
+    game = battleship.get_current_game()
+    enemyBoard = game.enemyBoard
+
     print("    1   2   3   4   5   6   7   8   9   1O ")
     for i in range(10):
         curLetter = chr(i+65)
@@ -72,6 +88,9 @@ def printEnemyBoard():
 
 
 def printTargetBoard():
+    game = battleship.get_current_game()
+    targetBoard = game.targetBoard
+
     print("       THE ENEMY'S AREA OF OPERATIONS      ")
     print("")
     print("    1   2   3   4   5   6   7   8   9   1O ")
@@ -158,17 +177,24 @@ def print_ascii_game_over():
      """)
 
 
+def clear_and_print_welcome_screen():
+    clear_terminal()
+    input_spacer_no_board()
+    print_ascii_logo()
+    input_spacer_with_board()
 
 
 def print_stats_box():
+    game = battleship.get_current_game()
+    
     clear_terminal()
     print_ascii_logo()
-    print(f"Turn Number: {turnCounter}")
-    print(f"Player hits: {hitCounts[0]}")
-    print(f"Enemy hits: {hitCounts[1]}")
+    print(f"Turn Number: {game.turnCounter}")
+    print(f"Player hits: {game.hitCounts[0]}")
+    print(f"Enemy hits: {game.hitCounts[1]}")
     input_spacer_no_board()
-    print(userLastTurn)
-    print(enemyLastTurn)
+    print(bs_playeractions.userLastTurn)
+    print(bs_enemyactions.enemyLastTurn)
 
 
 
