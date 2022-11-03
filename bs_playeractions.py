@@ -11,9 +11,13 @@ from bs_gridhelpers import generate_random_target
 from bs_shipplacement import place_ship
 import bs_global_hub
 
+
+
+
+
+
 def player_manual_turn_input():
     game = bs_global_hub.get_game_pointer()
-    global userLastTurn
     gridTarget = None
     rowTarget = None
     colTarget = None
@@ -38,12 +42,12 @@ def player_manual_turn_input():
             if game.enemyBoard[rowTarget][colTarget] == game.openSea:
                 game.targetBoard[rowTarget][colTarget] = game.missedShot
                 print("")
-                userLastTurn = f"YOU MISSED! No enemy ship at {inputTarget}!"
+                game.userLastTurnMessage = f"YOU MISSED! No enemy ship at {inputTarget}!"
             else:
                 game.targetBoard[rowTarget][colTarget] = game.shipStruck
                 game.hitCounts[0] = game.hitCounts[0] + 1
                 print("")
-                userLastTurn = f"YOU SCORED A HIT! Enemy ship struck at {inputTarget}!"
+                game.userLastTurnMessage = f"YOU SCORED A HIT! Enemy ship struck at {inputTarget}!"
             userFindingTarget = False
 
 
@@ -64,15 +68,14 @@ def player_auto_turn_input():
     if game.enemyBoard[randRow][randCol] == game.openSea:
         game.targetBoard[randRow][randCol] = game.missedShot
         alphaRandMiss = coord_to_alphanumeric(randomTarget)
-        global userLastTurn
-        userLastTurn = f"YOU MISSED! No enemy ship at {alphaRandMiss}!"
+        game.userLastTurnMessage = f"YOU MISSED! No enemy ship at {alphaRandMiss}!"
         print("")
         print("")
     else:
         game.targetBoard[randRow][randCol] = game.shipStruck
         alphaRandHit = coord_to_alphanumeric(randomTarget)
         game.hitCounts[0] = game.hitCounts[0] + 1
-        userLastTurn = f"YOU SCORED A HIT! Enemy ship struck at {alphaRandHit}!"
+        game.userLastTurnMessage = f"YOU SCORED A HIT! Enemy ship struck at {alphaRandHit}!"
         print("")
         print("")
 
