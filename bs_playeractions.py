@@ -39,12 +39,12 @@ def player_manual_turn_input():
             print("You have already entered this target, choose another.")
         else:
             game.userTargets.append(gridTarget)
-            if game.enemyBoard[rowTarget][colTarget] == game.openSea:
-                game.targetBoard[rowTarget][colTarget] = game.missedShot
+            if game.enemyBoard[rowTarget][colTarget] == game.OPEN_SEA:
+                game.targetBoard[rowTarget][colTarget] = game.MISSED_SHOT
                 print("")
                 game.userLastTurnMessage = f"YOU MISSED! No enemy ship at {inputTarget}!"
             else:
-                game.targetBoard[rowTarget][colTarget] = game.shipStruck
+                game.targetBoard[rowTarget][colTarget] = game.SHIP_STRUCK
                 game.hitCounts[0] = game.hitCounts[0] + 1
                 print("")
                 game.userLastTurnMessage = f"YOU SCORED A HIT! Enemy ship struck at {inputTarget}!"
@@ -65,14 +65,14 @@ def player_auto_turn_input():
         if randomTarget not in game.userTargets:
             game.userTargets.append(randomTarget)
             userAutoFindingTarget = False
-    if game.enemyBoard[randRow][randCol] == game.openSea:
-        game.targetBoard[randRow][randCol] = game.missedShot
+    if game.enemyBoard[randRow][randCol] == game.OPEN_SEA:
+        game.targetBoard[randRow][randCol] = game.MISSED_SHOT
         alphaRandMiss = coord_to_alphanumeric(randomTarget)
         game.userLastTurnMessage = f"YOU MISSED! No enemy ship at {alphaRandMiss}!"
         print("")
         print("")
     else:
-        game.targetBoard[randRow][randCol] = game.shipStruck
+        game.targetBoard[randRow][randCol] = game.SHIP_STRUCK
         alphaRandHit = coord_to_alphanumeric(randomTarget)
         game.hitCounts[0] = game.hitCounts[0] + 1
         game.userLastTurnMessage = f"YOU SCORED A HIT! Enemy ship struck at {alphaRandHit}!"
@@ -102,7 +102,7 @@ def ship_input_loop(shipName):
         inputBeg = process_alphanum_to_coord(inputBeg)
         inputEnd = process_alphanum_to_coord(inputEnd)
 
-        if place_ship(game.gameBoard, shipName, inputBeg, inputEnd) != False:
+        if place_ship(game.playerBoard, shipName, inputBeg, inputEnd) != False:
             shipLoop = False
         else:
             print("The coordinates you chose were sized improperly or occupied!")

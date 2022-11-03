@@ -16,13 +16,14 @@ import bs_global_hub
 gameOn = True
 inputLoop = True
 takingTurns = True
-currentGame = BattleshipInstance()
-bs_global_hub.set_game_pointer(currentGame)
+game = BattleshipInstance()
+bs_global_hub.set_game_pointer(game)
 
 
 print_welcome_screen()
 
 while(gameOn):
+    # player trapped in this loop which repeats until they have picked their settings and placed their ships
     while inputLoop:
         userInput = input("Type yes to begin placing ships, auto to have them placed for you, or exit to quit: ")
         if userInput == "exit":
@@ -38,13 +39,13 @@ while(gameOn):
             input_spacer_no_board()
             
             for i in range(5):
-                ship_input_loop(currentGame.shipNameList[i])
+                ship_input_loop(game.shipNameList[i])
                 input_spacer_with_board()
 
             inputLoop = False
 
         elif userInput == "auto":
-            auto_place_all_ships(currentGame.playerBoard)
+            auto_place_all_ships(game.playerBoard)
             clear_terminal()
             input_spacer_no_board()
             print("YOUR SHIPS HAVE BEEN AUTOMATICALLY PLACED")
@@ -55,54 +56,67 @@ while(gameOn):
             print("You must enter 'yes', 'auto', or 'exit'!")
         
     
-    auto_place_all_ships(currentGame.enemyBoard)
+    # place the enemy ships automatically and print the two boards
+    auto_place_all_ships(game.enemyBoard)
     clear_and_print_both_boards()
 
-    # uncomment this and the if else in the below while loop to enable automated player firing for quicker testing
+
     autoChoose = input("type auto to have your firing solutions automated or anything else to proceed normally: ")
+    # player trapped in this loop while player and AI take turns
     while takingTurns:
-        currentGame.turnCounter +=1
-        hitCounts = currentGame.hitCounts
-        if hitCounts[0] == 17 or hitCounts[1] == 17:
+        game.turnCounter +=1
+        print(game.hitCounts)
+
+        # if either player has 17 hits, the game is over
+        # if not, it's the players turn 
+        if game.eitherPlayerHas17Hits():
             takingTurns = False
             print_stats_and_both_boards()
+            continue
         else:
             if autoChoose == "auto":
                 player_auto_turn_input()
             else:
                 player_manual_turn_input()
-            #player_auto_turn_input()
-        if hitCounts[0] == 17 or hitCounts[1] == 17:
+
+        # check again if anybody has 17 hits after the player has just gone
+        # if not, it's the enemy's turn  
+        if game.eitherPlayerHas17Hits():
             takingTurns = False
             print_stats_and_both_boards()
+            continue
         else:
             enemy_turn_input()
-        if hitCounts[0] == 17 or hitCounts[1] == 17:
+        
+        # check once more for the winning condition
+        # if not, the loop will repeat from the top, continue ad infinitum until a winner reaches 17 hits
+        if game.eitherPlayerHas17Hits():
             takingTurns = False
             print_stats_and_both_boards()
+            continue
         else:
             print_stats_and_both_boards()
 
-    print_welcome_screen()
-    if hitCounts[0] > hitCounts[1]:
+
+    # if the above loop has escaped, somebody reached 17 hits to win
+    # if it was the player, print victory message. If enemy, print defeat message
+    if game.hitCounts[0] > game.hitCounts[1]:
         print("You sunk all of your opponents battleships and won the game.")
         print("")
     else:
         print("The enemy sunk all of your battleships and won the game.")
         print("")
 
+
+    # Ask the player if they'd like to play again, exiting loop if no, resetting game and starting the loop over if yes
     playAgain = input("Would you like to play again? Type yes to play another round or anything else to exit: ")
     if playAgain != 'yes':
         gameOn = False
     else:
         inputLoop = True
         takingTurns = True
-        currentGame.reset_game_instance()
-        
-        # clear_terminal()
-        input_spacer_no_board()
-        print_ascii_logo()
-        input_spacer_with_board()
+        game.reset_game_instance()
+        print_welcome_screen()
 
 
 

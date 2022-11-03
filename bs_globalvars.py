@@ -15,7 +15,7 @@ class BattleshipInstance:
     def __init__(self):
         # constants
         self.OPEN_SEA = Fore.LIGHTCYAN_EX + '__' + Style.RESET_ALL
-        self.SHIP_BODY = Fore.GREEN + 'QQ' + Style.RESET_ALL
+        #self.SHIP_BODY = Fore.GREEN + 'QQ' + Style.RESET_ALL
         self.SHIP_STRUCK = Fore.RED + 'XX' + Style.RESET_ALL
         self.MISSED_SHOT = Fore.LIGHTCYAN_EX + '00' + Style.RESET_ALL
         # variables
@@ -68,3 +68,7 @@ class BattleshipInstance:
                 self.playerBoard[x][y] = self.OPEN_SEA
                 self.enemyBoard[x][y] = self.OPEN_SEA
                 self.targetBoard[x][y] = self.OPEN_SEA
+
+    def eitherPlayerHas17Hits(self):
+        return (self.hitCounts[0] == 17 or self.hitCounts[1] == 17)
+

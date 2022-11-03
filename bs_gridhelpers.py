@@ -15,7 +15,7 @@ import bs_global_hub
 # Returns True if two x,y tuples are in the same row
 def in_same_row(beg, end):
     return beg[0] == end[0]
-    
+
 # Returns True if two x,y tuples are in the same column 
 def in_same_column(beg, end):
     return beg[1] == end[1]
@@ -48,7 +48,7 @@ def generate_full_coords(beg, end):
 #returns True if the coordinate sent as an argument already has a ship occupying it on the board
 def square_occupied(board, grid_tuple):
     game = bs_global_hub.get_game_pointer()
-    return board[grid_tuple[0]][grid_tuple[1]] != game.openSea
+    return board[grid_tuple[0]][grid_tuple[1]] != game.OPEN_SEA
 
 def coords_occupied(board, full_coords):
     flag = False

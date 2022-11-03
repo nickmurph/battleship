@@ -40,7 +40,6 @@ def traverseGrid(currentPos, leftOrRight, upOrDown, jumpInterval):
 # Each time the enemy has a turn, they will select a coordinate in the while loop and then that shot is validated as either a miss or hot
 def enemy_turn_input():
     game = bs_global_hub.get_game_pointer()
-    global enemyLastTurn
     currentTarget = None
     targetRow = None
     targetCol = None
@@ -82,7 +81,7 @@ def enemy_turn_input():
 
 
     # proceeding with the coordinate previously generated as our firing solution
-    #  if no ship is there, mark the corresponding square in the gameBoard as a missed shot
+    #  if no ship is there, mark the corresponding square in the playerBoard as a missed shot
     # if the coordinate is not empty sea, then it must be a hit
     # increment the hitcount and inform the player the AI has struck a ship
     
@@ -94,19 +93,19 @@ def enemy_turn_input():
         targetCol = game.enemyGridPos[1]
     #print(targetRow,targetCol)
 
-    if game.gameBoard[targetRow][targetCol] == game.openSea:
-        game.gameBoard[targetRow][targetCol] = game.missedShot
+    if game.playerBoard[targetRow][targetCol] == game.OPEN_SEA:
+        game.playerBoard[targetRow][targetCol] = game.MISSED_SHOT
         #alphaRandMiss = coord_to_alphanumeric(currentTarget)
         alphaRandMiss = coord_to_alphanumeric(game.enemyGridPos)
-        enemyLastTurn = f"THE ENEMY MISSED! Their shot landed at {alphaRandMiss}!"
+        game.enemyLastTurnMessage = f"THE ENEMY MISSED! Their shot landed at {alphaRandMiss}!"
         print("")
         print("")
     else:
-        game.gameBoard[targetRow][targetCol] = game.shipStruck
+        game.playerBoard[targetRow][targetCol] = game.SHIP_STRUCK
         #alphaRandHit = coord_to_alphanumeric(currentTarget)
         alphaRandHit = coord_to_alphanumeric(game.enemyGridPos)
         game.hitCounts[1] = game.hitCounts[1] + 1
-        enemyLastTurn = f"THE ENEMY SCORED A HIT! Your ship was struck at {alphaRandHit}!"
+        game.enemyLastTurnMessage = f"THE ENEMY SCORED A HIT! Your ship was struck at {alphaRandHit}!"
         print("")
         print("")
 
