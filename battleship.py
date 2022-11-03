@@ -44,7 +44,7 @@ while(gameOn):
             inputLoop = False
 
         elif userInput == "auto":
-            auto_place_all_ships(currentGame.gameBoard)
+            auto_place_all_ships(currentGame.playerBoard)
             clear_terminal()
             input_spacer_no_board()
             print("YOUR SHIPS HAVE BEEN AUTOMATICALLY PLACED")
@@ -65,8 +65,7 @@ while(gameOn):
         hitCounts = currentGame.hitCounts
         if hitCounts[0] == 17 or hitCounts[1] == 17:
             takingTurns = False
-            print_stats_box()
-            print_both_boards()
+            print_stats_and_both_boards()
         else:
             if autoChoose == "auto":
                 player_auto_turn_input()
@@ -75,21 +74,16 @@ while(gameOn):
             #player_auto_turn_input()
         if hitCounts[0] == 17 or hitCounts[1] == 17:
             takingTurns = False
-            print_stats_box()
-            print_both_boards()
+            print_stats_and_both_boards()
         else:
             enemy_turn_input()
         if hitCounts[0] == 17 or hitCounts[1] == 17:
             takingTurns = False
-            print_stats_box()
-            print_both_boards()
+            print_stats_and_both_boards()
         else:
-            print_stats_box()
-            print_both_boards()
+            print_stats_and_both_boards()
 
-    input_spacer_no_board()
-    print_ascii_game_over()
-    input_spacer_no_board()
+    print_welcome_screen()
     if hitCounts[0] > hitCounts[1]:
         print("You sunk all of your opponents battleships and won the game.")
         print("")

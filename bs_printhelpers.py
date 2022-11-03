@@ -6,7 +6,6 @@
 
 import os
 from bs_globalvars import *
-import bs_enemyactions
 import bs_playeractions
 import bs_global_hub
 
@@ -188,8 +187,14 @@ def print_stats_box():
     print(f"Player hits: {game.hitCounts[0]}")
     print(f"Enemy hits: {game.hitCounts[1]}")
     input_spacer_no_board()
-    print(bs_playeractions.userLastTurn)
-    print(bs_enemyactions.enemyLastTurn)
+    print(game.userLastTurnMessage)
+    print(game.enemyLastTurnMessage)
+
+def print_stats_and_both_boards():
+    print_stats_box()
+    print_both_boards()
+
+
 
 
 

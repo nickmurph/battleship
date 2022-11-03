@@ -8,7 +8,8 @@ from bs_convhelpers import coord_to_alphanumeric
 from bs_gridhelpers import *
 import bs_global_hub
 
-enemyLastTurn = None
+
+
 
 
 #currentPos is a tuple of 

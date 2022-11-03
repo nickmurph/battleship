@@ -8,9 +8,14 @@ import random
 from bs_globalvars import *
 import bs_global_hub
 
+
+
+
+
 # Returns True if two x,y tuples are in the same row
 def in_same_row(beg, end):
     return beg[0] == end[0]
+    
 # Returns True if two x,y tuples are in the same column 
 def in_same_column(beg, end):
     return beg[1] == end[1]
@@ -53,7 +58,7 @@ def coords_occupied(board, full_coords):
             #print("This coordinate, " + str(coord) + ", is already occupied!")
     return flag
 
-
+# returns a random coordinate of the form [0-9][0-9], converted to alphanumeric elsewhere
 def generate_random_target():
     rand1 = random.randint(0,9)
     rand2 = random.randint(0,9)
