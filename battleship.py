@@ -65,7 +65,6 @@ while(gameOn):
     # player trapped in this loop while player and AI take turns
     while takingTurns:
         game.turnCounter +=1
-        print(game.hitCounts)
 
         # if either player has 17 hits, the game is over
         # if not, it's the players turn 
@@ -86,7 +85,7 @@ while(gameOn):
             print_stats_and_both_boards()
             continue
         else:
-            enemy_turn_input()
+            enemy_turn_input(game.enemyTraverseLeftOrRight, game.enemyTraverseUpOrDown)
         
         # check once more for the winning condition
         # if not, the loop will repeat from the top, continue ad infinitum until a winner reaches 17 hits
