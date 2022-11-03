@@ -24,6 +24,7 @@ class BattleshipInstance:
         self.enemyTargets = []
         self.hitCounts = [0,0]
         self.enemyGridPos = [0,-1]
+        self.enemyMode = "grid" # random, grid, or kill are the acceptable choices
         self.rdToggle = False
         self.turnCounter = 0
         self.shipsHashMap = {}

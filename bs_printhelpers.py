@@ -5,20 +5,13 @@
 #
 
 import os
-# from battleship import gameBoard, enemyBoard, targetBoard
-# from battleship import turnCounter, hitCounts
 from bs_globalvars import *
-# from bs_enemyactions import enemyLastTurn
-# from bs_playeractions import userLastTurn
-# from battleship import get_current_game
-#import battleship
 import bs_enemyactions
 import bs_playeractions
 import bs_global_hub
 
 
 def printGameBoard():
-    # game = battleship.get_current_game()
     game = bs_global_hub.get_game_pointer()
     gameBoard = game.gameBoard
     print("           YOUR AREA OF OPERATIONS         ")
@@ -90,7 +83,6 @@ def printEnemyBoard():
 
 
 def printTargetBoard():
-    # game = battleship.get_current_game()
     game = bs_global_hub.get_game_pointer()
     targetBoard = game.targetBoard
 
@@ -188,7 +180,6 @@ def print_welcome_screen():
 
 
 def print_stats_box():
-    # game = battleship.get_current_game()
     game = bs_global_hub.get_game_pointer()
     
     clear_terminal()
