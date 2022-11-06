@@ -3,6 +3,7 @@
 #   Enemy AI actions   
 #
 #
+
 import copy
 from bs_convhelpers import coord_to_alphanumeric
 from bs_gridhelpers import *
@@ -79,7 +80,7 @@ def traverseGrid(currentPos, leftOrRight, upOrDown, jumpInterval):
     return nextTarget
 
 
-# Each time the enemy has a turn, they will select a coordinate in the while loop and then that shot is validated as either a miss or hot
+# Each time the enemy has a turn, they will select a coordinate in the while loop and then that shot is validated as either a miss or hit
 def enemy_turn_input(leftOrRight, upOrDown):
     game = bs_global_hub.get_game_pointer()
     currentTarget = None
@@ -89,7 +90,7 @@ def enemy_turn_input(leftOrRight, upOrDown):
 
     
 
-    # generate a random coordinate and check that it hasn't been fired at before
+    # generate a coordinate (randomly or by grid-hopping) and check that it hasn't been fired at before
     # if it has, repeat the loop and generate a new one
     # if it hasn't, exit the loop by setting the enemyFindingTarget flag to false
     while enemyFindingTarget:
@@ -112,8 +113,19 @@ def enemy_turn_input(leftOrRight, upOrDown):
             if currentTarget not in game.enemyTargets:
                 game.enemyTargets.append(currentTarget)
                 enemyFindingTarget = False   
-            game.enemyGridPos = currentTarget
+            
+            #temp
+            print(game.enemyGridPos)
+            prevRow = game.enemyGridPos[0]
+            prevCol = game.enemyGridPos[1]
+            print(game.playerBoard[prevRow][prevCol])
 
+            
+            
+            game.enemyGridPos = currentTarget
+            
+            
+        
 
         #post-hit kill search        
         elif game.enemyMode == "kill":
