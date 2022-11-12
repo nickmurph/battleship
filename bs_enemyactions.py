@@ -115,10 +115,10 @@ def enemy_turn_input(leftOrRight, upOrDown):
                 enemyFindingTarget = False   
             
             #temp
-            print(game.enemyGridPos)
+            #print(game.enemyGridPos)
             prevRow = game.enemyGridPos[0]
             prevCol = game.enemyGridPos[1]
-            print(game.playerBoard[prevRow][prevCol])
+            #print(game.playerBoard[prevRow][prevCol])
 
             
             
