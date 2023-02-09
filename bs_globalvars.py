@@ -31,7 +31,6 @@ class BattleshipInstance:
         self.enemyLastTurnMessage = None
 
         # AI targeting variables
-        self.levelOfAI = 2 #1, 2, or 3. 1 is random, 2 is grid hopper, 3 is grid hopper with hunter-killer search
         self.enemyGridPos = [0,-1]
         self.enemyMode = "grid" # random, grid, or kill are the valid choices
         self.rdToggle = False
